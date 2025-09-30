@@ -23,6 +23,7 @@ val AppTypography = Typography(
     titleLarge = TextStyle(
         fontFamily = Poppins,
         fontWeight = FontWeight.SemiBold,
+
         fontSize = 22.sp,
         letterSpacing = 0.sp
     ),

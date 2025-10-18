@@ -5,7 +5,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.nextmatch.app.ui.HomeScreen
 import com.nextmatch.app.ui.screen.*
 import com.nextmatch.app.viewmodel.ContactoViewModel
 import com.nextmatch.app.viewmodel.UsuarioViewModel
@@ -20,7 +19,7 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "login"
     ) {
         // Pantalla Principal
         composable(route = "home") {
@@ -66,6 +65,20 @@ fun AppNavigation() {
         }
         composable(route = "chat") {
             ChatScreenCompose(navController)
+        }
+
+        // Pantallas Adicionales
+        composable(route = "crear_equipo") {
+            CrearEquipoScreenCompose(navController)
+        }
+        composable(route = "mapa_canchas") {
+            MapaCanchasScreenCompose(navController)
+        }
+        composable(route = "perfil_usuario") {
+            PerfilUsuarioScreenCompose(navController)
+        }
+        composable(route = "notificaciones") {
+            NotificacionesScreenCompose(navController)
         }
 
         // Formularios Originales

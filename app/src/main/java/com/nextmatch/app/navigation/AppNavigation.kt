@@ -19,8 +19,13 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "login"
+        startDestination = "landing"
     ) {
+        // Pantalla de Bienvenida/Landing
+        composable(route = "landing") {
+            LandingScreen(navController)
+        }
+
         // Pantalla Principal
         composable(route = "home") {
             HomeScreen(navController)
@@ -39,10 +44,13 @@ fun AppNavigation() {
 
         // Búsqueda y Equipos
         composable(route = "matchmaking") {
-            MatchmakingScreenCompose(navController)
+            MatchmakingScreenNew(navController)
         }
         composable(route = "teams") {
-            TeamsListScreenCompose(navController)
+            TeamsSelectionScreen(navController)
+        }
+        composable(route = "match_found") {
+            MatchFoundScreen(navController)
         }
         composable(route = "team_profile") {
             TeamProfileScreenCompose(navController)

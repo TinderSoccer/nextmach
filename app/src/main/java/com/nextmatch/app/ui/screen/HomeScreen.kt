@@ -11,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.nextmatch.app.R
@@ -29,226 +30,157 @@ fun HomeScreen(navController: androidx.navigation.NavController? = null) {
         // Column: organiza elementos verticalmente
         Column(
             modifier = Modifier
-                .padding(innerPadding) // Evita solaparse con la barra superior
-                .fillMaxSize()          // Ocupa toda la pantalla
-                .background(MaterialTheme.colorScheme.background) // Fondo del tema
-                .padding(16.dp),        // Padding general de la pantalla
-            verticalArrangement = Arrangement.Center, // Centrado vertical
-            horizontalAlignment = Alignment.CenterHorizontally // Centrado horizontal
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(colorResource(R.color.background_black))
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo de la app
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Logo
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo de NextMatch",
-                modifier = Modifier.size(200.dp) // Tamaño del logo
+                modifier = Modifier.size(150.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp)) // Espacio debajo del logo
-
-            // Texto de bienvenida
-            Text(
-                text = "Bienvenido a NextMatch ⚽",
-                style = MaterialTheme.typography.titleLarge, // Tipografía del tema
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Spacer(modifier = Modifier.height(16.dp)) // Espacio antes del primer botón
-
-            // Botón principal: Ir a Registro
-            Button(
-                onClick = { navController?.navigate("registro") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = RoundedCornerShape(12.dp) // Bordes redondeados
-            ) {
-                Text(
-                    text = "Registro de Usuario",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp)) // Espacio entre botones
-
-            // Botón secundario: Formulario de Contacto
-            Button(
-                onClick = { navController?.navigate("contacto") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Formulario de Contacto",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp)) // Separación antes de Row adicional
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
-                thickness = 1.dp,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Navegación adicional
-            Button(
-                onClick = { navController?.navigate("login") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Iniciar Sesión",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController?.navigate("matchmaking") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Buscar Oponentes",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController?.navigate("teams") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Equipos Disponibles",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController?.navigate("booking") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Reservar Cancha",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController?.navigate("messages") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Mensajes",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
-                thickness = 1.dp,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Nuevas pantallas
-            Button(
-                onClick = { navController?.navigate("crear_equipo") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Crear Equipo", style = MaterialTheme.typography.bodyLarge)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController?.navigate("mapa_canchas") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Mapa de Canchas", style = MaterialTheme.typography.bodyLarge)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController?.navigate("perfil_usuario") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Mi Perfil", style = MaterialTheme.typography.bodyLarge)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController?.navigate("notificaciones") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Notificaciones", style = MaterialTheme.typography.bodyLarge)
-            }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Título
+            Text(
+                text = "Menú Principal",
+                style = MaterialTheme.typography.headlineMedium,
+                color = colorResource(R.color.neon_green),
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Buscar Oponentes
+            Button(
+                onClick = { navController?.navigate("matchmaking") },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.neon_green)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "🔍 Buscar Oponentes",
+                    color = colorResource(R.color.background_black),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
+
+            // Equipos Disponibles
+            Button(
+                onClick = { navController?.navigate("teams") },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.neon_green)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "👥 Equipos",
+                    color = colorResource(R.color.background_black),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
+
+            // Reservar Cancha
+            Button(
+                onClick = { navController?.navigate("booking") },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.neon_green)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "⚽ Reservar Cancha",
+                    color = colorResource(R.color.background_black),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
+
+            // Mensajes
+            Button(
+                onClick = { navController?.navigate("messages") },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.neon_green)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "💬 Mensajes",
+                    color = colorResource(R.color.background_black),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            HorizontalDivider(
+                color = colorResource(R.color.text_white).copy(alpha = 0.2f),
+                thickness = 1.dp,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Mi Perfil
+            Button(
+                onClick = { navController?.navigate("perfil_usuario") },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.surface_dark)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "👤 Mi Perfil",
+                    color = colorResource(R.color.neon_green),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
+
+            // Mapa de Canchas
+            Button(
+                onClick = { navController?.navigate("mapa_canchas") },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.surface_dark)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "🗺️ Mapa de Canchas",
+                    color = colorResource(R.color.neon_green),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
+
+            // Notificaciones
+            Button(
+                onClick = { navController?.navigate("notificaciones") },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.surface_dark)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "🔔 Notificaciones",
+                    color = colorResource(R.color.neon_green),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }

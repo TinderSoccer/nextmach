@@ -1,5 +1,6 @@
 package com.nextmatch.app.ui.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -18,8 +20,8 @@ import com.nextmatch.app.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreenCompose(navController: NavController) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("test@test.com") }
+    var password by remember { mutableStateOf("password123") }
     var emailError by remember { mutableStateOf("") }
     var passwordError by remember { mutableStateOf("") }
 
@@ -33,11 +35,13 @@ fun LoginScreenCompose(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Elemento Fuego",
-                style = MaterialTheme.typography.headlineLarge,
-                color = colorResource(R.color.text_white),
-                modifier = Modifier.padding(bottom = 32.dp)
+            // Logo de la app
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Logo de NextMatch",
+                modifier = Modifier
+                    .size(150.dp)
+                    .padding(bottom = 24.dp)
             )
 
             // Email Input

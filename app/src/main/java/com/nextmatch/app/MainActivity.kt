@@ -4,12 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.nextmatch.app.ui.screen.HomeScreen
-import com.nextmatch.app.ui.screen.LoginScreen
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Modifier
+import com.nextmatch.app.navigation.AppNavigation
 import com.nextmatch.app.ui.theme.NextMatchTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,12 +17,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NextMatchTheme {
-                var isLoggedIn by remember { mutableStateOf(false) }
-
-                if (isLoggedIn) {
-                    HomeScreen()
-                } else {
-                    LoginScreen(onLoginSuccess = { isLoggedIn = true })
+                Scaffold { innerPadding ->
+                    Box(modifier = Modifier.padding(paddingValues = innerPadding)) {
+                        AppNavigation()
+                    }
                 }
             }
         }

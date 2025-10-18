@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Colores Primarios -->
+    <color name="neon_green">#FF39FF14</color>
+    <color name="neon_green_dark">#FF2FCC0E</color>
+
+    <!-- Colores Oscuros (Tema) -->
+    <color name="background_black">#FF000000</color>
+    <color name="background_dark_gray">#FF121212</color>
+    <color name="surface_dark">#FF1E1E1E</color>
+
+    <!-- Colores de Texto -->
+    <color name="text_white">#FFFFFFFF</color>
+    <color name="text_light_gray">#FFE0E0E0</color>
+    <color name="text_medium_gray">#FFB0B0B0</color>
+    <color name="text_dark_gray">#FF808080</color>
+
+    <!-- Colores de Estado -->
+    <color name="success_green">#FF00C853</color>
+    <color name="error_red">#FFFF5252</color>
+    <color name="warning_orange">#FFFF9800</color>
+
+    <!-- Colores Secundarios -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,4 +28,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Transparente -->
+    <color name="transparent">#00000000</color>
 </resources>

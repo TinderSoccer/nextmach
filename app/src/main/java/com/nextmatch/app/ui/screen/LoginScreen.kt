@@ -1,183 +1,161 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.nextmatch.app.ui.screen
 
-import android.util.Patterns
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.nextmatch.app.R
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.graphics.Color
 
-/**
- * LoginScreen simple e interactivo.
- *
- * onLoginSuccess: lambda que se ejecuta cuando el login "falla" la validación.
- * (En el futuro reemplazarás la validación local por Firebase Auth)
- */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    onLoginSuccess: () -> Unit
-) {
-    // Estados locales para campos y mensajes
+fun LoginScreenCompose(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var showPassword by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
 
-    // Layout principal
-    Scaffold { innerPadding ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Iniciar Sesión") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorResource(R.color.surface_dark),
+                    titleContentColor = colorResource(R.color.text_white)
+                )
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background) // toma el fondo del tema
                 .padding(innerPadding)
+                .fillMaxSize()
+                .background(colorResource(R.color.background_black))
                 .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // Logo (reutiliza tu drawable/logo.png)
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo NextMatch",
-                modifier = Modifier.size(300.dp)
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            // Título
             Text(
-                text = "Iniciar sesión",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
+                text = "Elemento Fuego",
+                style = MaterialTheme.typography.headlineLarge,
+                color = colorResource(R.color.text_white),
+                modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Email input
-            OutlinedTextField(
+            // Email Input
+            TextField(
                 value = email,
                 onValueChange = {
                     email = it
-                    errorMessage = null
+                    emailError = ""
                 },
-                label = { Text("Correo electrónico") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
+                label = { Text("Correo Electrónico") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                shape = RoundedCornerShape(8.dp),
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = colorResource(R.color.surface_dark),
+                    focusedContainerColor = colorResource(R.color.surface_dark),
+                    unfocusedTextColor = colorResource(R.color.text_white),
+                    focusedTextColor = colorResource(R.color.text_white),
+                    focusedIndicatorColor = colorResource(R.color.neon_green)
                 )
             )
+            if (emailError.isNotEmpty()) {
+                Text(emailError, color = colorResource(R.color.error_red), style = MaterialTheme.typography.labelSmall)
+            }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Password input
-            OutlinedTextField(
+            // Password Input
+            TextField(
                 value = password,
                 onValueChange = {
                     password = it
-                    errorMessage = null
+                    passwordError = ""
                 },
                 label = { Text("Contraseña") },
-                singleLine = true,
-                visualTransformation = if (showPassword) PasswordVisualTransformation() else PasswordVisualTransformation(),
-                trailingIcon = {
-                    TextButton(onClick = { showPassword = !showPassword }) {
-                        Text(if (showPassword) "Ocultar" else "Mostrar")
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                shape = RoundedCornerShape(8.dp),
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = colorResource(R.color.surface_dark),
+                    focusedContainerColor = colorResource(R.color.surface_dark),
+                    unfocusedTextColor = colorResource(R.color.text_white),
+                    focusedTextColor = colorResource(R.color.text_white),
+                    focusedIndicatorColor = colorResource(R.color.neon_green)
                 )
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Mensaje de error (si existe)
-            if (!errorMessage.isNullOrEmpty()) {
-                Text(
-                    text = errorMessage ?: "",
-                    color = Color(0xFFFF6B6B), // rojo suave
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+            if (passwordError.isNotEmpty()) {
+                Text(passwordError, color = colorResource(R.color.error_red), style = MaterialTheme.typography.labelSmall)
             }
 
-            // Botón principal de login
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Login Button
             Button(
                 onClick = {
-                    // Validación simple local (para aprender)
-                    when {
-                        email.isBlank() || password.isBlank() -> {
-                            errorMessage = "Por favor completa correo y contraseña."
-                        }
-                        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                            errorMessage = "Correo inválido."
-                        }
-                        password.length < 6 -> {
-                            errorMessage = "La contraseña debe tener al menos 6 caracteres."
-                        }
-                        else -> {
-                            // Validación ok -> simulamos login exitoso
-                            errorMessage = null
-                            onLoginSuccess()
+                    var valid = true
+                    if (email.isEmpty() || !email.contains("@")) {
+                        emailError = "Email inválido"
+                        valid = false
+                    }
+                    if (password.isEmpty() || password.length < 6) {
+                        passwordError = "Contraseña mínimo 6 caracteres"
+                        valid = false
+                    }
+                    if (valid) {
+                        navController.navigate("home") {
+                            popUpTo("login") { inclusive = true }
                         }
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,      // verde/neón si tu tema lo tiene
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = MaterialTheme.shapes.medium
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.neon_green)),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = "Iniciar Sesión")
+                Text("Iniciar Sesión", color = colorResource(R.color.background_black))
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Botones secundarios (Google y Invitado - por ahora mock)
-            OutlinedButton(
-                onClick = { /* TODO: integrar Google Sign-In */ },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Continuar con Google")
+            // Forgot Password
+            TextButton(onClick = { /* TODO */ }) {
+                Text("¿Olvidaste tu contraseña?", color = colorResource(R.color.neon_green))
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            TextButton(
-                onClick = { /* login como invitado */ onLoginSuccess() },
-                modifier = Modifier.fillMaxWidth()
+            // Register Button
+            Button(
+                onClick = { navController.navigate("registro") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.surface_dark)),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Entrar como invitado")
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Enlace a registro (solo visual)
-            TextButton(onClick = { /* TODO: navegar a RegisterScreen */ }) {
-                Text("¿No tienes cuenta? Regístrate")
+                Text("Registrarse", color = colorResource(R.color.neon_green))
             }
         }
     }

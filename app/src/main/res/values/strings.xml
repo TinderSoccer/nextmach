@@ -1,3 +1,60 @@
 <resources>
     <string name="app_name">NextMatch</string>
+
+    <!-- Login Screen -->
+    <string name="app_logo">App Logo</string>
+    <string name="login_title">Elemento Fuego</string>
+    <string name="email_hint">Correo Electrónico</string>
+    <string name="password_hint">Contraseña</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="register_button">Registrarse</string>
+    <string name="terms_text">Al continuar, aceptas nuestros términos y condiciones</string>
+
+    <!-- Register Screen -->
+    <string name="back_button">Back</string>
+    <string name="register_title">Crear Cuenta</string>
+    <string name="register_subtitle">Únete a la comunidad de fútbol</string>
+    <string name="username_hint">Nombre de Usuario</string>
+    <string name="confirm_password_hint">Confirmar Contraseña</string>
+    <string name="accept_terms">Acepto los términos y condiciones</string>
+    <string name="create_account_button">Crear Cuenta</string>
+
+    <!-- Matchmaking Screen -->
+    <string name="searching_opponents">Buscando oponentes...</string>
+    <string name="cancel_search">Cancelar búsqueda</string>
+
+    <!-- Teams List Screen -->
+    <string name="available_teams">Equipos disponibles</string>
+    <string name="create_team">Crear equipo</string>
+    <string name="join_request">Solicitar unirse</string>
+
+    <!-- Team Profile Screen -->
+    <string name="view_full_profile">Ver Perfil Completo</string>
+    <string name="request_to_join">Solicitar unirse al partido</string>
+    <string name="goals">Goles</string>
+    <string name="matches_played">Partidos jugados</string>
+
+    <!-- Field Booking Screen -->
+    <string name="search_fields">Buscar canchas</string>
+    <string name="field_name">Cancha del Sol</string>
+    <string name="field_details">Detalles de la cancha</string>
+
+    <!-- Calendar Screen -->
+    <string name="available_times">Horarios disponibles</string>
+    <string name="continue_button">Continuar</string>
+
+    <!-- Confirmation Screen -->
+    <string name="confirm_booking">Confirmar tu reserva</string>
+    <string name="booking_date">Fecha</string>
+    <string name="booking_time">Hora</string>
+    <string name="booking_cost">Costo</string>
+
+    <!-- Messages Screen -->
+    <string name="chats_title">Chats y solicitudes de equipo</string>
+    <string name="last_message">Último mensaje</string>
+
+    <!-- Chat Screen -->
+    <string name="send_button">Enviar</string>
+    <string name="message_hint">Escribe un mensaje...</string>
 </resources>

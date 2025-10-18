@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_black"
+    tools:context=".teams.TeamProfileActivity">
+
+    <!-- ScrollView para contenido desplazable -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/ll_actions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Imagen de perfil grande -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="300dp">
+
+                <ImageView
+                    android:id="@+id/iv_team_profile"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/surface_dark"
+                    android:contentDescription="Team Profile"
+                    android:scaleType="centerCrop"
+                    tools:src="@drawable/ic_flame" />
+
+                <!-- Overlay con información -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/neon_green"
+                    android:alpha="0.3"
+                    android:gravity="bottom"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_team_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nombre del Equipo"
+                        android:textColor="@color/text_white"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <RatingBar
+                        android:id="@+id/rb_team_level"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:layout_marginTop="8dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:rating="4.0"
+                        android:scaleX="0.7"
+                        android:scaleY="0.7"
+                        android:transformPivotX="0dp"
+                        android:transformPivotY="0dp" />
+                </LinearLayout>
+
+                <!-- Botón Cerrar -->
+                <Button
+                    android:id="@+id/btn_close"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="start|top"
+                    android:layout_margin="16dp"
+                    android:background="@drawable/bg_button_icon"
+                    android:contentDescription="Close"
+                    android:text="✕"
+                    android:textColor="@color/neon_green"
+                    android:textSize="18sp" />
+
+            </FrameLayout>
+
+            <!-- Información del equipo -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Ubicación -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ubicación"
+                    android:textColor="@color/text_medium_gray"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tv_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Santiago, Chile"
+                    android:textColor="@color/text_white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- Divisor -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/text_dark_gray" />
+
+                <!-- Estadísticas -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Goles -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/goals"
+                            android:textColor="@color/text_medium_gray"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_goals"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="45"
+                            android:textColor="@color/neon_green"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Partidos jugados -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/matches_played"
+                            android:textColor="@color/text_medium_gray"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_matches"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="12"
+                            android:textColor="@color/neon_green"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Divisor -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/text_dark_gray" />
+
+                <!-- Descripción -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Descripción"
+                    android:textColor="@color/text_medium_gray"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tv_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Equipo de fútbol recreativo buscando nuevos jugadores para competencias"
+                    android:textColor="@color/text_light_gray"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Contenedor de acciones -->
+    <LinearLayout
+        android:id="@+id/ll_actions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        android:spacing="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Botón Ver Perfil Completo -->
+        <Button
+            android:id="@+id/btn_view_profile"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/bg_button_secondary"
+            android:text="@string/view_full_profile"
+            android:textColor="@color/neon_green"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Botón Solicitar unirse -->
+        <Button
+            android:id="@+id/btn_request_join"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/bg_button_primary"
+            android:text="@string/request_to_join"
+            android:textColor="@color/text_white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

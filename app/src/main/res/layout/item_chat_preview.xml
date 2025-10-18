@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:background="@color/background_black"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="8dp">
+
+    <!-- Avatar -->
+    <ImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@color/surface_dark"
+        android:contentDescription="User Avatar"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_flame" />
+
+    <!-- Contenedor de información -->
+    <LinearLayout
+        android:id="@+id/ll_chat_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toStartOf="@id/tv_time"
+        app:layout_constraintStart_toEndOf="@id/iv_avatar"
+        app:layout_constraintTop_toTopOf="@id/iv_avatar">
+
+        <!-- Nombre del chat -->
+        <TextView
+            android:id="@+id/tv_chat_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre del Equipo"
+            android:textColor="@color/text_white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Último mensaje -->
+        <TextView
+            android:id="@+id/tv_last_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Último mensaje aquí..."
+            android:textColor="@color/text_medium_gray"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Hora del último mensaje -->
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="14:30"
+        android:textColor="@color/neon_green"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/iv_avatar" />
+
+    <!-- Indicador de mensajes sin leer (badge) -->
+    <View
+        android:id="@+id/view_unread_indicator"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:background="@drawable/bg_badge"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/iv_avatar"
+        app:layout_constraintEnd_toEndOf="@id/iv_avatar" />
+
+    <!-- Separador -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/text_dark_gray"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/iv_avatar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

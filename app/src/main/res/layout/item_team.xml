@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_edittext_dark"
+    android:padding="16dp">
+
+    <!-- Avatar del equipo -->
+    <ImageView
+        android:id="@+id/iv_team_avatar"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@color/surface_dark"
+        android:contentDescription="Team Avatar"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_flame" />
+
+    <!-- Contenedor de información del equipo -->
+    <LinearLayout
+        android:id="@+id/ll_team_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toStartOf="@id/btn_join"
+        app:layout_constraintStart_toEndOf="@id/iv_team_avatar"
+        app:layout_constraintTop_toTopOf="@id/iv_team_avatar">
+
+        <!-- Nombre del equipo -->
+        <TextView
+            android:id="@+id/tv_team_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre del Equipo"
+            android:textColor="@color/text_white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Ubicación del equipo -->
+        <TextView
+            android:id="@+id/tv_team_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Ubicación"
+            android:textColor="@color/text_medium_gray"
+            android:textSize="12sp" />
+
+        <!-- Nivel / Estrellas -->
+        <RatingBar
+            android:id="@+id/rb_team_level"
+            android:layout_width="wrap_content"
+            android:layout_height="16dp"
+            android:layout_marginTop="4dp"
+            android:isIndicator="true"
+            android:numStars="5"
+            android:rating="3.0"
+            android:scaleX="0.7"
+            android:scaleY="0.7"
+            android:transformPivotX="0dp"
+            android:transformPivotY="0dp" />
+
+    </LinearLayout>
+
+    <!-- Botón de solicitud -->
+    <Button
+        android:id="@+id/btn_join"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_button_primary"
+        android:contentDescription="@string/join_request"
+        android:text="✓"
+        android:textColor="@color/background_black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/iv_team_avatar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/iv_team_avatar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.nextmatch.app.R
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: androidx.navigation.NavController? = null) {
     // Scaffold: estructura principal con TopAppBar
     Scaffold(
         topBar = {
@@ -54,9 +54,9 @@ fun HomeScreen() {
 
             Spacer(modifier = Modifier.height(16.dp)) // Espacio antes del primer botón
 
-            // Botón principal: Crear Partido
+            // Botón principal: Ir a Registro
             Button(
-                onClick = { /* TODO: Acción Crear Partido */ },
+                onClick = { navController?.navigate("registro") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -65,16 +65,16 @@ fun HomeScreen() {
                 shape = RoundedCornerShape(12.dp) // Bordes redondeados
             ) {
                 Text(
-                    text = "Crear Partido",
+                    text = "Registro de Usuario",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp)) // Espacio entre botones
 
-            // Botón secundario: Ver mis Partidos
+            // Botón secundario: Formulario de Contacto
             Button(
-                onClick = { /* TODO: Acción Ver mis Partidos */ },
+                onClick = { navController?.navigate("contacto") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -83,7 +83,7 @@ fun HomeScreen() {
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
-                    text = "Ver mis Partidos",
+                    text = "Formulario de Contacto",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -97,38 +97,93 @@ fun HomeScreen() {
             )
 
 
-            // Row: ejemplo de elementos secundarios (iconos o botones)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Botón secundario 1
-                Button(
-                    onClick = { /* TODO: Acción secundaria 1 */ },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
-                ) {
-                    Text("Estadísticas")
-                }
+            Spacer(modifier = Modifier.height(12.dp))
 
-                // Botón secundario 2
-                Button(
-                    onClick = { /* TODO: Acción secundaria 2 */ },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
-                ) {
-                    Text("Perfil")
-                }
+            // Navegación adicional
+            Button(
+                onClick = { navController?.navigate("login") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Iniciar Sesión",
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp)) // Espacio final
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = { navController?.navigate("matchmaking") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Buscar Oponentes",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = { navController?.navigate("teams") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Equipos Disponibles",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = { navController?.navigate("booking") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Reservar Cancha",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = { navController?.navigate("messages") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Mensajes",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

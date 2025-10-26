@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.nextmatch.app.R
+import com.nextmatch.app.utils.GpsCalculator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -518,10 +519,29 @@ fun CrearEquipoScreenCompose(navController: NavController) {
     }
 }
 
-// PANTALLA 8: MAPA DE CANCHAS
+// PANTALLA 8: MAPA DE CANCHAS CON GPS NATIVO
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapaCanchasScreenCompose(navController: NavController) {
+    // Ubicación del usuario actual (ejemplo: Buenos Aires, Argentina)
+    val userLatitude = -34.6037
+    val userLongitude = -58.3816
+
+    // Datos de canchas con sus coordenadas GPS reales
+    val canchas = listOf(
+        Triple("Cancha del Centro", -34.6000, -58.3800),          // ~0.5 km
+        Triple("Cancha La Boca", -34.6350, -58.3600),             // ~5.2 km
+        Triple("Cancha Nordelta", -34.4817, -58.7542),            // ~32 km (para mostrar distancias largas)
+    )
+
+    val gpsCalculator = GpsCalculator()
+
+    // Calcular distancias usando función nativa JNI en C
+    val distancias = canchas.map { (nombre, lat, lon) ->
+        val distancia = gpsCalculator.calcularDistanciaGPS(userLatitude, userLongitude, lat, lon)
+        Triple(nombre, distancia, gpsCalculator.formatearDistancia(distancia))
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -545,36 +565,96 @@ fun MapaCanchasScreenCompose(navController: NavController) {
                 .background(colorResource(R.color.background_black)),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Simulación de mapa
+            // Información del mapa
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
                     .background(colorResource(R.color.surface_dark))
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("📍 Mapa de Canchas", color = colorResource(R.color.neon_green), fontSize = 18.sp)
+                    Text("📍 Mapa de Canchas", color = colorResource(R.color.neon_green), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("Cálculos GPS en tiempo real (JNI)", color = colorResource(R.color.neon_green), fontSize = 12.sp)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Zona: Centro - 3 canchas disponibles", color = colorResource(R.color.text_medium_gray))
+                    Text("Tu ubicación: -34.60°S, -58.38°O", color = colorResource(R.color.text_medium_gray), fontSize = 11.sp)
                 }
             }
 
-            // Lista de canchas cercanas
-            LazyColumn(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(3) { index ->
+            // Lista de canchas cercanas ordenadas por distancia
+            LazyColumn(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(distancias.size) { index ->
+                    val (nombre, distanciaKm, distanciaFormato) = distancias[index]
+                    val estaCerca = distanciaKm < 5.0
+
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { navController.navigate("booking") },
-                        colors = CardDefaults.cardColors(containerColor = colorResource(R.color.surface_dark))
+                        colors = CardDefaults.cardColors(
+                            containerColor = colorResource(R.color.surface_dark)
+                        ),
+                        border = if (estaCerca) {
+                            BorderStroke(2.dp, colorResource(R.color.neon_green))
+                        } else null
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
-                            Text("Cancha ${index + 1} - ${20 - index} km", color = colorResource(R.color.neon_green), fontWeight = FontWeight.Bold)
-                            Text("Disponible hoy", color = colorResource(R.color.text_medium_gray), fontSize = 12.sp)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    nombre,
+                                    color = colorResource(R.color.neon_green),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                                Text(
+                                    distanciaFormato,
+                                    color = if (estaCerca) colorResource(R.color.neon_green) else colorResource(R.color.text_medium_gray),
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 13.sp
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                if (estaCerca) "✓ Cercana - Disponible hoy" else "Disponible hoy",
+                                color = colorResource(R.color.text_medium_gray),
+                                fontSize = 12.sp
+                            )
                         }
                     }
+                }
+            }
+
+            // Nota sobre la tecnología
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = colorResource(R.color.surface_dark)),
+                border = BorderStroke(1.dp, colorResource(R.color.neon_green))
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        "🚀 Función Nativa JNI en C",
+                        color = colorResource(R.color.neon_green),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        "Las distancias se calculan usando la fórmula Haversine implementada en código C nativo para máximo rendimiento.",
+                        color = colorResource(R.color.text_medium_gray),
+                        fontSize = 11.sp
+                    )
                 }
             }
         }

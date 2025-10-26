@@ -2,6 +2,9 @@
 
 package com.nextmatch.app.ui.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -39,87 +43,125 @@ fun HomeScreen(navController: androidx.navigation.NavController? = null) {
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Logo
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo de NextMatch",
-                modifier = Modifier.size(150.dp)
-            )
+            // Logo con animación de entrada
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { -50 }) + fadeIn()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Logo de NextMatch",
+                    modifier = Modifier.size(150.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Título
-            Text(
-                text = "Menú Principal",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colorResource(R.color.neon_green),
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-            )
+            // Título con animación
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { -30 }) + fadeIn()
+            ) {
+                Text(
+                    text = "Menú Principal",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = colorResource(R.color.neon_green),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Buscar Oponentes
-            Button(
-                onClick = { navController?.navigate("matchmaking") },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.neon_green)
-                ),
-                shape = RoundedCornerShape(12.dp)
+            // Buscar Oponentes - Botón 1
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { 30 }) + fadeIn()
             ) {
-                Text(
-                    text = "🔍 Buscar Oponentes",
-                    color = colorResource(R.color.background_black),
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
+                Button(
+                    onClick = { navController?.navigate("matchmaking") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.neon_green)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "🔍 Buscar Oponentes",
+                        color = colorResource(R.color.background_black),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                }
             }
 
-            // Equipos Disponibles
-            Button(
-                onClick = { navController?.navigate("teams") },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.neon_green)
-                ),
-                shape = RoundedCornerShape(12.dp)
+            // Equipos Disponibles - Botón 2
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { 30 }) + fadeIn()
             ) {
-                Text(
-                    text = "👥 Equipos",
-                    color = colorResource(R.color.background_black),
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
+                Button(
+                    onClick = { navController?.navigate("teams") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.neon_green)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "👥 Equipos",
+                        color = colorResource(R.color.background_black),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                }
             }
 
-            // Reservar Cancha
-            Button(
-                onClick = { navController?.navigate("booking") },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.neon_green)
-                ),
-                shape = RoundedCornerShape(12.dp)
+            // Reservar Cancha - Botón 3
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { 30 }) + fadeIn()
             ) {
-                Text(
-                    text = "⚽ Reservar Cancha",
-                    color = colorResource(R.color.background_black),
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
+                Button(
+                    onClick = { navController?.navigate("booking") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.neon_green)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "⚽ Reservar Cancha",
+                        color = colorResource(R.color.background_black),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                }
             }
 
-            // Mensajes
-            Button(
-                onClick = { navController?.navigate("messages") },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.neon_green)
-                ),
-                shape = RoundedCornerShape(12.dp)
+            // Mensajes - Botón 4
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { 30 }) + fadeIn()
             ) {
-                Text(
-                    text = "💬 Mensajes",
-                    color = colorResource(R.color.background_black),
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
+                Button(
+                    onClick = { navController?.navigate("messages") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.neon_green)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "💬 Mensajes",
+                        color = colorResource(R.color.background_black),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -132,52 +174,73 @@ fun HomeScreen(navController: androidx.navigation.NavController? = null) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Mi Perfil
-            Button(
-                onClick = { navController?.navigate("perfil_usuario") },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.surface_dark)
-                ),
-                shape = RoundedCornerShape(12.dp)
+            // Mi Perfil - Botón 5
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { 30 }) + fadeIn()
             ) {
-                Text(
-                    text = "👤 Mi Perfil",
-                    color = colorResource(R.color.neon_green),
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
+                Button(
+                    onClick = { navController?.navigate("perfil_usuario") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.surface_dark)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "👤 Mi Perfil",
+                        color = colorResource(R.color.neon_green),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                }
             }
 
-            // Mapa de Canchas
-            Button(
-                onClick = { navController?.navigate("mapa_canchas") },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.surface_dark)
-                ),
-                shape = RoundedCornerShape(12.dp)
+            // Mapa de Canchas - Botón 6
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { 30 }) + fadeIn()
             ) {
-                Text(
-                    text = "🗺️ Mapa de Canchas",
-                    color = colorResource(R.color.neon_green),
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
+                Button(
+                    onClick = { navController?.navigate("mapa_canchas") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.surface_dark)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "🗺️ Mapa de Canchas",
+                        color = colorResource(R.color.neon_green),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                }
             }
 
-            // Notificaciones
-            Button(
-                onClick = { navController?.navigate("notificaciones") },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.surface_dark)
-                ),
-                shape = RoundedCornerShape(12.dp)
+            // Notificaciones - Botón 7
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { 30 }) + fadeIn()
             ) {
-                Text(
-                    text = "🔔 Notificaciones",
-                    color = colorResource(R.color.neon_green),
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
+                Button(
+                    onClick = { navController?.navigate("notificaciones") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.surface_dark)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "🔔 Notificaciones",
+                        color = colorResource(R.color.neon_green),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))

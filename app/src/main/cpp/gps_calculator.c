@@ -5,41 +5,26 @@
 #define LOG_TAG "NextMatchGPS"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
-// Constantes
 #define EARTH_RADIUS_KM 6371.0
 #define PI 3.14159265359
 #define DEG_TO_RAD(deg) ((deg) * PI / 180.0)
 #define RAD_TO_DEG(rad) ((rad) * 180.0 / PI)
 
-/**
- * Calcula la distancia entre dos puntos GPS usando la fórmula de Haversine
- *
- * @param lat1 Latitud del primer punto en grados
- * @param lon1 Longitud del primer punto en grados
- * @param lat2 Latitud del segundo punto en grados
- * @param lon2 Longitud del segundo punto en grados
- * @return Distancia en kilómetros
- */
-double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
-    // Convertir grados a radianes
+// Fórmula de Haversine para calcular distancia entre dos puntos GPS
+double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
     double lat1_rad = DEG_TO_RAD(lat1);
     double lon1_rad = DEG_TO_RAD(lon1);
     double lat2_rad = DEG_TO_RAD(lat2);
     double lon2_rad = DEG_TO_RAD(lon2);
 
-    // Diferencias
     double dlat = lat2_rad - lat1_rad;
     double dlon = lon2_rad - lon1_rad;
 
-    // Fórmula de Haversine
     double a = sin(dlat / 2) * sin(dlat / 2) +
-               cos(lat1_rad) * cos(lat2_rad) *
-               sin(dlon / 2) * sin(dlon / 2);
+               cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2) * sin(dlon / 2);
 
     double c = 2 * asin(sqrt(a));
-    double distance = EARTH_RADIUS_KM * c;
-
-    return distance;
+    return EARTH_RADIUS_KM * c;
 }
 
 /**
@@ -55,7 +40,7 @@ Java_com_nextmatch_app_utils_GpsCalculator_calcularDistanciaGPS(
         jdouble lat2,
         jdouble lon2) {
 
-    double distance = calculateHaversineDistance(lat1, lon1, lat2, lon2);
+    double distance = haversineDistance(lat1, lon1, lat2, lon2);
     LOGI("Distancia calculada: %.2f km", distance);
     return distance;
 }

@@ -40,6 +40,8 @@ abstract class NextMatchDatabase : RoomDatabase() {
                     NextMatchDatabase::class.java,
                     "nextmatch_database"
                 )
+                    .fallbackToDestructiveMigration()
+                    .allowMainThreadQueries()
                     .build()
                 instance = db
                 db

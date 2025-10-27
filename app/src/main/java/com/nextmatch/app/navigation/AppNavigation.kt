@@ -173,7 +173,7 @@ fun AppNavigation() {
             enterTransition = { slideInRight },
             exitTransition = { slideOutLeft }
         ) {
-            PerfilUsuarioScreenCompose(navController)
+            PerfilUsuarioScreenCompose(navController, authViewModel)
         }
         composable(
             route = "notificaciones",

@@ -1,6 +1,7 @@
 package com.nextmatch.app.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,9 +10,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -664,7 +667,10 @@ fun MapaCanchasScreenCompose(navController: NavController) {
 // PANTALLA 9: PERFIL DE USUARIO
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PerfilUsuarioScreenCompose(navController: NavController) {
+fun PerfilUsuarioScreenCompose(navController: NavController, authViewModel: com.nextmatch.app.viewmodel.AuthViewModel? = null) {
+    val authState = authViewModel?.estado?.collectAsState()?.value
+    val usuarioActual = authState?.usuarioActual
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -707,8 +713,8 @@ fun PerfilUsuarioScreenCompose(navController: NavController) {
                         Text("👤", fontSize = 40.sp)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Juan Silva", color = colorResource(R.color.text_white), fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("juansilva@email.com", color = colorResource(R.color.text_medium_gray), fontSize = 12.sp)
+                    Text(usuarioActual?.nombre ?: "Nombre", color = colorResource(R.color.text_white), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(usuarioActual?.correo ?: "correo@email.com", color = colorResource(R.color.text_medium_gray), fontSize = 12.sp)
                 }
             }
 

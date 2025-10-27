@@ -28,7 +28,10 @@ class AuthViewModel(private val usuarioDao: UsuarioDao) : ViewModel() {
         clave: String,
         direccion: String
     ) {
+        android.util.Log.d("AuthViewModel", ">>> registrarUsuario llamado: $nombre / $correo")
+
         if (!validarDatos(nombre, correo, clave, direccion)) {
+            android.util.Log.d("AuthViewModel", "❌ Validación falló")
             _estado.value = _estado.value.copy(error = "Datos incompletos")
             return
         }
@@ -36,10 +39,12 @@ class AuthViewModel(private val usuarioDao: UsuarioDao) : ViewModel() {
         viewModelScope.launch {
             try {
                 _estado.value = _estado.value.copy(isLoading = true, error = null)
+                android.util.Log.d("AuthViewModel", "Iniciando registro para: $correo")
 
                 // Verificar si el correo ya existe
                 val usuarioExistente = usuarioDao.obtenerUsuarioPorCorreo(correo)
                 if (usuarioExistente != null) {
+                    android.util.Log.d("AuthViewModel", "Correo ya existe: $correo")
                     _estado.value = _estado.value.copy(
                         error = "El correo ya está registrado",
                         isLoading = false
@@ -51,19 +56,27 @@ class AuthViewModel(private val usuarioDao: UsuarioDao) : ViewModel() {
                 val nuevoUsuario = UsuarioEntity(
                     nombre = nombre,
                     correo = correo,
-                    clave = clave, // En producción, hashear la contraseña
+                    clave = clave,
                     direccion = direccion
                 )
+                android.util.Log.d("AuthViewModel", "Usuario creado en memoria: $nuevoUsuario")
 
-                usuarioDao.insertarUsuario(nuevoUsuario)
+                val userId = usuarioDao.insertarUsuario(nuevoUsuario)
+                android.util.Log.d("AuthViewModel", "✓ Usuario insertado en BD con ID: $userId")
+
+                // Verificar que se guardó
+                val usuarioGuardado = usuarioDao.obtenerUsuarioPorId(userId.toInt())
+                android.util.Log.d("AuthViewModel", "Verificación - Usuario guardado: $usuarioGuardado")
 
                 _estado.value = _estado.value.copy(
-                    usuarioActual = nuevoUsuario,
+                    usuarioActual = nuevoUsuario.copy(id = userId.toInt()),
                     isAutenticado = true,
                     isLoading = false,
                     error = null
                 )
+                android.util.Log.d("AuthViewModel", "✓ Estado actualizado - Usuario autenticado")
             } catch (e: Exception) {
+                android.util.Log.e("AuthViewModel", "❌ Error al registrar: ${e.message}", e)
                 _estado.value = _estado.value.copy(
                     error = "Error al registrar: ${e.message}",
                     isLoading = false

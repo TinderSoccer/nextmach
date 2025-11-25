@@ -16,14 +16,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // Configurar NDK para compilar código C/C++
-        ndk {
-            abiFilters.add("armeabi-v7a")
-            abiFilters.add("arm64-v8a")
-            abiFilters.add("x86")
-            abiFilters.add("x86_64")
-        }
     }
 
     buildTypes {
@@ -51,14 +43,6 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.11"
-    }
-
-    // Configurar CMake para compilar código nativo
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
     }
 }
 
@@ -93,6 +77,9 @@ dependencies {
 
     // Lottie Animations
     implementation("com.airbnb.android:lottie-compose:6.1.0")
+
+    // Location Services
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

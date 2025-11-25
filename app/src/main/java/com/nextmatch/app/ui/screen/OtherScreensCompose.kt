@@ -579,7 +579,7 @@ fun MapaCanchasScreenCompose(navController: NavController) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("📍 Mapa de Canchas", color = colorResource(R.color.neon_green), fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Cálculos GPS en tiempo real (JNI)", color = colorResource(R.color.neon_green), fontSize = 12.sp)
+                    Text("Cálculos GPS en tiempo real (API nativa)", color = colorResource(R.color.neon_green), fontSize = 12.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Tu ubicación: -34.60°S, -58.38°O", color = colorResource(R.color.text_medium_gray), fontSize = 11.sp)
                 }
@@ -648,13 +648,13 @@ fun MapaCanchasScreenCompose(navController: NavController) {
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
-                        "🚀 Función Nativa JNI en C",
+                        "🚀 GPS del dispositivo",
                         color = colorResource(R.color.neon_green),
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     )
                     Text(
-                        "Las distancias se calculan usando la fórmula Haversine implementada en código C nativo para máximo rendimiento.",
+                        "Las distancias se calculan usando la API Location de Android para aprovechar el GPS nativo del equipo.",
                         color = colorResource(R.color.text_medium_gray),
                         fontSize = 11.sp
                     )

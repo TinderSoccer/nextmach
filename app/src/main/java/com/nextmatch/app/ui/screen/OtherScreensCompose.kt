@@ -1,5 +1,10 @@
 package com.nextmatch.app.ui.screen
 
+import android.Manifest
+import android.location.Location
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,20 +15,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.nextmatch.app.R
+import com.nextmatch.app.ui.components.OpenStreetMapView
+import com.nextmatch.app.ui.components.OsmMarker
 import com.nextmatch.app.utils.GpsCalculator
+import com.nextmatch.app.utils.LocationTracker
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -526,23 +539,72 @@ fun CrearEquipoScreenCompose(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapaCanchasScreenCompose(navController: NavController) {
-    // Ubicación del usuario actual (ejemplo: Buenos Aires, Argentina)
-    val userLatitude = -34.6037
-    val userLongitude = -58.3816
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val locationTracker = remember(context.applicationContext) {
+        LocationTracker(context.applicationContext)
+    }
+    val gpsCalculator = remember { GpsCalculator() }
 
-    // Datos de canchas con sus coordenadas GPS reales
-    val canchas = listOf(
-        Triple("Cancha del Centro", -34.6000, -58.3800),          // ~0.5 km
-        Triple("Cancha La Boca", -34.6350, -58.3600),             // ~5.2 km
-        Triple("Cancha Nordelta", -34.4817, -58.7542),            // ~32 km (para mostrar distancias largas)
-    )
+    val userLocationState = remember { mutableStateOf<android.location.Location?>(null) }
+    val isRequestingLocation = remember { mutableStateOf(false) }
+    val permissionGranted = remember { mutableStateOf(locationTracker.hasLocationPermission()) }
+    val permissionError = remember { mutableStateOf<String?>(null) }
 
-    val gpsCalculator = GpsCalculator()
+    val canchas = remember {
+        listOf(
+            Cancha("Cancha Municipal Miraflores", -12.1211, -77.0305),
+            Cancha("Estadio San Isidro", -12.1024, -77.0301),
+            Cancha("Complejo La Molina", -12.0873, -76.9713),
+            Cancha("Club San Borja", -12.0998, -76.9991),
+            Cancha("Villa Deportiva Surco", -12.1394, -76.9931)
+        )
+    }
 
-    // Calcular distancias usando función nativa JNI en C
-    val distancias = canchas.map { (nombre, lat, lon) ->
-        val distancia = gpsCalculator.calcularDistanciaGPS(userLatitude, userLongitude, lat, lon)
-        Triple(nombre, distancia, gpsCalculator.formatearDistancia(distancia))
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        permissionGranted.value = granted
+        if (granted) {
+            permissionError.value = null
+            scope.launch { loadUserLocation(locationTracker, userLocationState, isRequestingLocation) }
+        } else {
+            permissionError.value = "Se necesita el permiso para mostrar tu ubicación en el mapa."
+        }
+    }
+
+    LaunchedEffect(permissionGranted.value) {
+        if (permissionGranted.value && userLocationState.value == null && !isRequestingLocation.value) {
+            loadUserLocation(locationTracker, userLocationState, isRequestingLocation)
+        }
+    }
+
+    val originLat = userLocationState.value?.latitude ?: DEFAULT_LAT_LIMA
+    val originLon = userLocationState.value?.longitude ?: DEFAULT_LON_LIMA
+
+    val distancias = remember(originLat, originLon) {
+        canchas.map { cancha ->
+            val distancia = gpsCalculator.calcularDistanciaGPS(originLat, originLon, cancha.latitude, cancha.longitude)
+            CanchaDistancia(
+                cancha = cancha,
+                distanciaKm = distancia,
+                distanciaTexto = gpsCalculator.formatearDistancia(distancia)
+            )
+        }.sortedBy { it.distanciaKm }
+    }
+
+    val userMarker = userLocationState.value?.let {
+        OsmMarker(
+            latitude = it.latitude,
+            longitude = it.longitude,
+            title = "Tu ubicación",
+            description = "Actualizada con GPS nativo"
+        )
+    }
+    val canchaMarkers = canchas.map {
+        OsmMarker(latitude = it.latitude, longitude = it.longitude, title = it.nombre, description = "Disponible hoy")
     }
 
     Scaffold(
@@ -573,15 +635,59 @@ fun MapaCanchasScreenCompose(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(colorResource(R.color.surface_dark))
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(20.dp))
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("📍 Mapa de Canchas", color = colorResource(R.color.neon_green), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("Cálculos GPS en tiempo real (API nativa)", color = colorResource(R.color.neon_green), fontSize = 12.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Tu ubicación: -34.60°S, -58.38°O", color = colorResource(R.color.text_medium_gray), fontSize = 11.sp)
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(280.dp)
+                ) {
+                    OpenStreetMapView(
+                        userMarker = userMarker,
+                        canchaMarkers = canchaMarkers,
+                        modifier = Modifier.fillMaxSize(),
+                        zoom = 12.0
+                    )
+
+                    if (!permissionGranted.value) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(colorResource(R.color.background_black).copy(alpha = 0.75f))
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Necesitamos tu permiso de ubicación para mostrar el mapa en tiempo real.",
+                                color = colorResource(R.color.text_white),
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(onClick = {
+                                permissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                    )
+                                )
+                            }) {
+                                Text("Conceder permiso")
+                            }
+                        }
+                    } else if (isRequestingLocation.value) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(colorResource(R.color.background_black).copy(alpha = 0.55f)),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator(color = colorResource(R.color.neon_green))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Obteniendo tu ubicación...", color = colorResource(R.color.text_white))
+                        }
+                    }
                 }
             }
 
@@ -593,8 +699,8 @@ fun MapaCanchasScreenCompose(navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(distancias.size) { index ->
-                    val (nombre, distanciaKm, distanciaFormato) = distancias[index]
-                    val estaCerca = distanciaKm < 5.0
+                    val distanciaInfo = distancias[index]
+                    val estaCerca = distanciaInfo.distanciaKm < 5.0
 
                     Card(
                         modifier = Modifier
@@ -614,13 +720,13 @@ fun MapaCanchasScreenCompose(navController: NavController) {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    nombre,
+                                    distanciaInfo.cancha.nombre,
                                     color = colorResource(R.color.neon_green),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp
                                 )
                                 Text(
-                                    distanciaFormato,
+                                    distanciaInfo.distanciaTexto,
                                     color = if (estaCerca) colorResource(R.color.neon_green) else colorResource(R.color.text_medium_gray),
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
@@ -648,21 +754,58 @@ fun MapaCanchasScreenCompose(navController: NavController) {
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
-                        "🚀 GPS del dispositivo",
+                        "🗺️ OpenStreetMap + GPS del dispositivo",
                         color = colorResource(R.color.neon_green),
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     )
                     Text(
-                        "Las distancias se calculan usando la API Location de Android para aprovechar el GPS nativo del equipo.",
+                        "Renderizamos los mapas con OpenStreetMap (osmdroid) y calculamos distancias con la API de ubicación de Android para mantener todo nativo.",
                         color = colorResource(R.color.text_medium_gray),
                         fontSize = 11.sp
                     )
+                    permissionError.value?.let { error ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = error,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 11.sp
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+private suspend fun loadUserLocation(
+    locationTracker: LocationTracker,
+    userLocationState: MutableState<Location?>,
+    isRequestingLocation: MutableState<Boolean>
+) {
+    try {
+        isRequestingLocation.value = true
+        val location = locationTracker.getCurrentLocation()
+        userLocationState.value = location
+    } finally {
+        isRequestingLocation.value = false
+    }
+}
+
+private data class Cancha(
+    val nombre: String,
+    val latitude: Double,
+    val longitude: Double
+)
+
+private data class CanchaDistancia(
+    val cancha: Cancha,
+    val distanciaKm: Double,
+    val distanciaTexto: String
+)
+
+private const val DEFAULT_LAT_LIMA = -12.0464
+private const val DEFAULT_LON_LIMA = -77.0428
 
 // PANTALLA 9: PERFIL DE USUARIO
 @OptIn(ExperimentalMaterial3Api::class)

@@ -75,11 +75,16 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
+    implementation("androidx.preference:preference-ktx:1.2.1")
+
     // Lottie Animations
     implementation("com.airbnb.android:lottie-compose:6.1.0")
 
     // Location Services
     implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    // OpenStreetMap
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

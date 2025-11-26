@@ -62,6 +62,7 @@ public class ReservationController {
         existing.setJugadorId(request.getJugadorId());
         existing.setEstado(request.getEstado());
         existing.setNotas(request.getNotas());
+        existing.setFieldId(request.getFieldId());
         return reservationRepository.save(existing);
     }
 
@@ -89,6 +90,7 @@ public class ReservationController {
         private String jugadorId;
         private ReservationStatus estado = ReservationStatus.PENDIENTE;
         private String notas;
+        private String fieldId;
 
         // getters and setters
         public String getCancha() { return cancha; }
@@ -107,6 +109,8 @@ public class ReservationController {
         public void setEstado(ReservationStatus estado) { this.estado = estado; }
         public String getNotas() { return notas; }
         public void setNotas(String notas) { this.notas = notas; }
+        public String getFieldId() { return fieldId; }
+        public void setFieldId(String fieldId) { this.fieldId = fieldId; }
 
         Reservation toEntity() {
             return new Reservation(
@@ -118,7 +122,8 @@ public class ReservationController {
                     equipoId,
                     jugadorId,
                     estado,
-                    notas
+                    notas,
+                    fieldId
             );
         }
     }

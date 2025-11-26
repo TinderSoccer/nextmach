@@ -25,7 +25,8 @@ El API quedará disponible en `http://localhost:8080` y la documentación Swagge
 ## Endpoints principales
 - `POST /api/teams`, `GET /api/teams`, `PUT /api/teams/{id}`, `DELETE /api/teams/{id}`
 - `POST /api/players`, `GET /api/players?equipoId=...`, `PUT /api/players/{id}`, `DELETE /api/players/{id}`
-- `POST /api/reservations`, `GET /api/reservations?equipoId=...&fecha=YYYY-MM-DD`, `PUT /api/reservations/{id}`, `DELETE /api/reservations/{id}`
+- `POST /api/fields`, `GET /api/fields`, `PUT /api/fields/{id}`, `DELETE /api/fields/{id}` (lat/lon, dirección, servicios)
+- `POST /api/reservations`, `GET /api/reservations?equipoId=...&fecha=YYYY-MM-DD`, `PUT /api/reservations/{id}`, `DELETE /api/reservations/{id}` (ahora pueden incluir `fieldId` además de `cancha`)
 
 ## Próximos pasos
 - Añadir autenticación (API keys o JWT) si se requiere.

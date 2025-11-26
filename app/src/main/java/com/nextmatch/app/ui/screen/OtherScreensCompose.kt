@@ -11,17 +11,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.nextmatch.app.R
+import com.nextmatch.app.data.repository.FieldRepository
+import com.nextmatch.app.model.Field
 import com.nextmatch.app.ui.components.OpenStreetMapView
 import com.nextmatch.app.ui.components.OsmMarker
 import com.nextmatch.app.utils.GpsCalculator
@@ -181,6 +187,59 @@ fun TeamProfileScreenCompose(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingScreenCompose(navController: NavController) {
+    val context = LocalContext.current
+    val locationTracker = remember(context.applicationContext) { LocationTracker(context.applicationContext) }
+    val hasLocationPermission = remember { mutableStateOf(locationTracker.hasLocationPermission()) }
+    val userLocation = remember { mutableStateOf<Location?>(null) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        hasLocationPermission.value = granted
+    }
+    val gpsCalculator = remember { GpsCalculator() }
+    val repository = remember { FieldRepository() }
+    var fields by remember { mutableStateOf<List<Field>>(emptyList()) }
+    var fieldsError by remember { mutableStateOf<String?>(null) }
+    var loadingFields by remember { mutableStateOf(true) }
+    var selectedField by remember { mutableStateOf<Field?>(null) }
+
+    LaunchedEffect(hasLocationPermission.value) {
+        if (hasLocationPermission.value) {
+            userLocation.value = locationTracker.getCurrentLocation()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        loadingFields = true
+        val result = repository.fetchFields()
+        result.onSuccess {
+            fields = it
+            fieldsError = null
+        }.onFailure { throwable ->
+            fieldsError = throwable.message
+        }
+        loadingFields = false
+    }
+
+    val fieldMarkers = fields.map { field ->
+        OsmMarker(field.latitud, field.longitud, field.nombre, field.direccion)
+    }
+    val fieldDistances = remember(fields, userLocation.value) {
+        fields.map { field ->
+            val distance = userLocation.value?.let { location ->
+                gpsCalculator.calcularDistanciaGPS(
+                    location.latitude,
+                    location.longitude,
+                    field.latitud,
+                    field.longitud
+                )
+            }
+            FieldWithDistance(field, distance)
+        }.sortedBy { it.distanceKm ?: Double.MAX_VALUE }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -202,24 +261,106 @@ fun BookingScreenCompose(navController: NavController) {
                 .padding(innerPadding)
                 .fillMaxSize()
                 .background(colorResource(R.color.background_black))
-                .padding(24.dp),
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
-            Text("Cancha del Sol", style = MaterialTheme.typography.titleLarge, color = colorResource(R.color.text_white))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Santiago, Chile", color = colorResource(R.color.text_medium_gray))
-            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = "Elige la cancha más cercana",
+                style = MaterialTheme.typography.headlineSmall,
+                color = colorResource(R.color.text_white),
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Utilizamos tu GPS para ordenar las canchas por distancia",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colorResource(R.color.text_medium_gray)
+            )
 
-            Button(
-                onClick = { navController.navigate("calendar") },
+            Spacer(modifier = Modifier.height(16.dp))
+
+            BookingStatusCard(
+                isSearching = loadingFields,
+                hasPermission = hasLocationPermission.value,
+                errorMessage = fieldsError,
+                onRequestPermission = {
+                    permissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            BookingMapCard(
+                userMarker = userLocation.value?.let {
+                    OsmMarker(
+                        latitude = it.latitude,
+                        longitude = it.longitude,
+                        title = "Tu ubicación",
+                        description = "Actualizada con GPS"
+                    )
+                },
+                fieldMarkers = fieldMarkers,
+                hasLocationPermission = hasLocationPermission.value,
+                isSearching = loadingFields,
+                onRequestPermission = {
+                    permissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            FieldSelectionList(
+                fieldDistances = fieldDistances,
+                selectedField = selectedField,
+                onSelect = { field -> selectedField = field }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                selectedField?.let { field ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("selectedFieldName", field.nombre)
+                    navController.currentBackStackEntry?.savedStateHandle?.set("selectedFieldId", field.id)
+                    navController.navigate("calendar")
+                }
+            },
+            enabled = selectedField != null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.neon_green),
+                contentColor = colorResource(R.color.background_black),
+                disabledContainerColor = colorResource(R.color.neon_green).copy(alpha = 0.3f),
+                disabledContentColor = colorResource(R.color.background_black)
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(if (selectedField == null) "Selecciona una cancha" else "Elegir fecha y hora", fontWeight = FontWeight.Bold)
+        }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = { navController.popBackStack() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.neon_green)),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Seleccionar Fecha y Hora", color = colorResource(R.color.background_black))
+                Text("Volver", color = colorResource(R.color.neon_green), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -228,6 +369,7 @@ fun BookingScreenCompose(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreenCompose(navController: NavController) {
+    val fieldName = navController.previousBackStackEntry?.savedStateHandle?.get<String>("selectedFieldName")
     Scaffold(
         topBar = {
             TopAppBar(
@@ -252,12 +394,21 @@ fun CalendarScreenCompose(navController: NavController) {
                 .background(colorResource(R.color.background_black))
                 .padding(24.dp)
         ) {
+            fieldName?.let {
+                Text("Cancha seleccionada", color = colorResource(R.color.text_medium_gray), fontSize = 12.sp)
+                Text(it, style = MaterialTheme.typography.titleMedium, color = colorResource(R.color.text_white))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             Text("Horarios Disponibles", style = MaterialTheme.typography.titleLarge, color = colorResource(R.color.text_white))
             Spacer(modifier = Modifier.height(24.dp))
 
             hours.forEach { hour ->
                 Button(
-                    onClick = { navController.navigate("confirmation") },
+                    onClick = {
+                        navController.currentBackStackEntry?.savedStateHandle?.set("selectedFieldName", fieldName)
+                        navController.currentBackStackEntry?.savedStateHandle?.set("selectedHour", hour)
+                        navController.navigate("confirmation")
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
@@ -275,6 +426,9 @@ fun CalendarScreenCompose(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfirmationScreenCompose(navController: NavController) {
+    val savedStateHandle = navController.previousBackStackEntry?.savedStateHandle
+    val selectedFieldName = savedStateHandle?.get<String>("selectedFieldName")
+    val selectedHour = savedStateHandle?.get<String>("selectedHour")
     Scaffold(
         topBar = {
             TopAppBar(
@@ -309,10 +463,15 @@ fun ConfirmationScreenCompose(navController: NavController) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Resumen de Reserva", style = MaterialTheme.typography.titleLarge, color = colorResource(R.color.text_white))
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Cancha: Cancha del Sol", color = colorResource(R.color.text_white))
-                    Text("Fecha: 28/11/2024", color = colorResource(R.color.text_white))
-                    Text("Hora: 20:00 - 21:00", color = colorResource(R.color.text_white))
-                    Text("Costo: \$120.000", color = colorResource(R.color.neon_green), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "Cancha: ${selectedFieldName ?: "Sin seleccionar"}",
+                        color = colorResource(R.color.text_white)
+                    )
+                    Text(
+                        text = "Hora: ${selectedHour ?: "Por definir"}",
+                        color = colorResource(R.color.text_white)
+                    )
+                    Text("Costo estimado: \$120.000", color = colorResource(R.color.neon_green), style = MaterialTheme.typography.titleMedium)
                 }
             }
 
@@ -329,6 +488,158 @@ fun ConfirmationScreenCompose(navController: NavController) {
                 Text("Confirmar Reserva", color = colorResource(R.color.background_black))
             }
         }
+    }
+}
+
+private data class FieldWithDistance(val field: Field, val distanceKm: Double?)
+
+@Composable
+private fun FieldSelectionList(
+    fieldDistances: List<FieldWithDistance>,
+    selectedField: Field?,
+    onSelect: (Field) -> Unit
+) {
+    if (fieldDistances.isEmpty()) {
+        Text(
+            text = "No se encontraron canchas registradas.",
+            color = colorResource(R.color.text_medium_gray),
+            modifier = Modifier.fillMaxWidth()
+        )
+        return
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        fieldDistances.forEach { item ->
+            val isSelected = selectedField?.id == item.field.id
+            Card(
+                modifier = Modifier.fillMaxWidth().clickable { onSelect(item.field) },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isSelected)
+                        colorResource(R.color.surface_dark)
+                    else
+                        colorResource(R.color.background_black)
+                ),
+                border = if (isSelected) BorderStroke(1.dp, colorResource(R.color.neon_green)) else null
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(item.field.nombre, color = colorResource(R.color.text_white), fontWeight = FontWeight.Bold)
+                    Text(item.field.direccion, color = colorResource(R.color.text_medium_gray), fontSize = 12.sp)
+                    item.distanceKm?.let { distance ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = formatDistance(distance),
+                            color = colorResource(R.color.neon_green),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BookingStatusCard(
+    isSearching: Boolean,
+    hasPermission: Boolean,
+    errorMessage: String?,
+    onRequestPermission: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colorResource(R.color.surface_dark)),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            val status = when {
+                isSearching -> "Sincronizando canchas disponibles..."
+                !hasPermission -> "Necesitamos tu permiso de ubicación"
+                else -> "Selecciona una cancha para continuar"
+            }
+            Text(text = status, color = colorResource(R.color.text_white), fontWeight = FontWeight.Medium)
+            if (!hasPermission) {
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(onClick = onRequestPermission) {
+                    Text("Activar GPS", color = colorResource(R.color.neon_green))
+                }
+            }
+            if (!errorMessage.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = errorMessage, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+            }
+        }
+    }
+}
+
+private fun formatDistance(distanceKm: Double): String =
+    if (distanceKm < 1) "${(distanceKm * 1000).toInt()} m" else String.format("%.2f km", distanceKm)
+
+@Composable
+private fun BookingMapCard(
+    userMarker: OsmMarker?,
+    fieldMarkers: List<OsmMarker>,
+    hasLocationPermission: Boolean,
+    isSearching: Boolean,
+    onRequestPermission: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 320.dp)
+            .aspectRatio(1.1f),
+        colors = CardDefaults.cardColors(containerColor = colorResource(R.color.surface_dark)),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            OpenStreetMapView(
+                userMarker = userMarker,
+                canchaMarkers = fieldMarkers,
+                modifier = Modifier.fillMaxSize(),
+                zoom = 13.0
+            )
+
+            when {
+                !hasLocationPermission -> {
+                    BookingMapOverlay {
+                        Text("Necesitamos tu permiso de ubicación", color = colorResource(R.color.text_white))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = onRequestPermission) { Text("Activar GPS") }
+                    }
+                }
+                isSearching -> {
+                    BookingMapOverlay {
+                        CircularProgressIndicator(color = colorResource(R.color.neon_green))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Buscando canchas...", color = colorResource(R.color.text_white))
+                    }
+                }
+                fieldMarkers.isEmpty() -> {
+                    BookingMapOverlay {
+                        Text("Sin canchas registradas", color = colorResource(R.color.text_white))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BookingMapOverlay(content: @Composable ColumnScope.() -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.background_black).copy(alpha = 0.65f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            content = content
+        )
     }
 }
 

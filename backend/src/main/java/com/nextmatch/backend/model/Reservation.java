@@ -20,6 +20,7 @@ public class Reservation {
     private LocalTime horaFin;
     private String equipoId;
     private String jugadorId;
+    private String fieldId;
     private ReservationStatus estado = ReservationStatus.PENDIENTE;
     private String notas;
 
@@ -33,7 +34,7 @@ public class Reservation {
     }
 
     public Reservation(String id, String cancha, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin,
-                       String equipoId, String jugadorId, ReservationStatus estado, String notas) {
+                       String equipoId, String jugadorId, ReservationStatus estado, String notas, String fieldId) {
         this.id = id;
         this.cancha = cancha;
         this.fecha = fecha;
@@ -43,6 +44,7 @@ public class Reservation {
         this.jugadorId = jugadorId;
         this.estado = estado;
         this.notas = notas;
+        this.fieldId = fieldId;
     }
 
     // getters/setters
@@ -60,6 +62,8 @@ public class Reservation {
     public void setEquipoId(String equipoId) { this.equipoId = equipoId; }
     public String getJugadorId() { return jugadorId; }
     public void setJugadorId(String jugadorId) { this.jugadorId = jugadorId; }
+    public String getFieldId() { return fieldId; }
+    public void setFieldId(String fieldId) { this.fieldId = fieldId; }
     public ReservationStatus getEstado() { return estado; }
     public void setEstado(ReservationStatus estado) { this.estado = estado; }
     public String getNotas() { return notas; }

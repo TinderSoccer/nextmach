@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -128,11 +130,14 @@ fun MatchmakingScreenNew(navController: NavController) {
         }
     }
 
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(R.color.background_black))
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -314,7 +319,8 @@ private fun MatchmakingMapCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(360.dp),
+            .heightIn(min = 360.dp)
+            .aspectRatio(1.1f),
         colors = CardDefaults.cardColors(
             containerColor = colorResource(R.color.surface_dark)
         ),

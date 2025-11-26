@@ -104,11 +104,12 @@ private fun OsmMarker.toMarker(mapView: MapView, isUser: Boolean): Marker {
         title = this@toMarker.title
         snippet = description
         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        icon = ContextCompat.getDrawable(
-            mapView.context,
-            if (isUser) R.drawable.bg_marker else R.drawable.bg_badge
-        )
-        if (isUser) subDescription = "Ubicación actual"
+        if (isUser) {
+            icon = null // usa el marcador de flecha nativo de osmdroid
+            subDescription = "Ubicación actual"
+        } else {
+            icon = ContextCompat.getDrawable(mapView.context, R.drawable.bg_badge)
+        }
     }
 }
 

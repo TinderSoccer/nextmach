@@ -8,12 +8,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import com.nextmatch.app.R
 
 @Composable
 fun OpenStreetMapView(
@@ -101,9 +103,11 @@ private fun OsmMarker.toMarker(mapView: MapView, isUser: Boolean): Marker {
         title = this@toMarker.title
         snippet = description
         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        if (isUser) {
-            subDescription = "Ubicación actual"
-        }
+        icon = ContextCompat.getDrawable(
+            mapView.context,
+            if (isUser) R.drawable.bg_marker else R.drawable.bg_badge
+        )
+        if (isUser) subDescription = "Ubicación actual"
     }
 }
 

@@ -314,7 +314,7 @@ private fun MatchmakingMapCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(280.dp),
+            .height(360.dp),
         colors = CardDefaults.cardColors(
             containerColor = colorResource(R.color.surface_dark)
         ),
@@ -353,15 +353,15 @@ private fun MatchmakingMapCard(
                         )
                     }
                 }
+            }
 
-                userMarker == null -> {
-                    MapOverlayBox {
-                        Text(
-                            text = "Pulsa 'Buscar rival' para mostrar tu marcador.",
-                            color = colorResource(R.color.text_white)
-                        )
-                    }
-                }
+            if (hasLocationPermission && userMarker == null && !isSearching) {
+                HintCard(
+                    text = "Pulsa 'Buscar rival' para mostrar tu ubicación en tiempo real",
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                )
             }
         }
     }
@@ -369,15 +369,37 @@ private fun MatchmakingMapCard(
 
 @Composable
 private fun MapOverlayBox(content: @Composable ColumnScope.() -> Unit) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(R.color.background_black).copy(alpha = 0.65f))
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        content = content
-    )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun HintCard(text: String, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colorResource(R.color.background_black).copy(alpha = 0.75f)),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(16.dp),
+            color = colorResource(R.color.text_white),
+            fontSize = 13.sp
+        )
+    }
 }
 
 @Composable

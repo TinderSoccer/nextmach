@@ -7,22 +7,31 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -131,102 +140,91 @@ fun MatchmakingScreenNew(navController: NavController) {
     }
 
     val scrollState = rememberScrollState()
+    val backgroundBrush = Brush.verticalGradient(
+        colors = listOf(
+            colorResource(R.color.background_black),
+            colorResource(R.color.surface_dark)
+        )
+    )
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.background_black))
-            .padding(24.dp)
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .background(backgroundBrush)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 32.dp)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
-
-            AnimatedVisibility(
-                visible = true,
-                enter = slideInVertically(initialOffsetY = { -50 }) + fadeIn()
-            ) {
-                Text(
-                    text = "Emparejamiento automático",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = colorResource(R.color.text_white),
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            AnimatedVisibility(
-                visible = isSearching.value,
-                enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn()
-            ) {
-                LoadingSoccerBall(modifier = Modifier.size(150.dp))
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            AnimatedVisibility(
-                visible = isSearching.value || gpsResult.value != null || errorMessage.value != null,
-                enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn()
-            ) {
-                val statusText = when {
-                    isSearching.value -> "Buscando rival...\nObteniendo ubicación GPS nativa..."
-                    errorMessage.value != null -> errorMessage.value!!
-                    gpsResult.value != null -> "Rival encontrado usando la ubicación real."
-                    else -> ""
-                }
-                val statusColor = if (errorMessage.value != null) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    colorResource(R.color.neon_green)
-                }
-
-                Text(
-                    text = statusText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = statusColor,
-                    fontSize = 14.sp
-                )
-            }
-
-            gpsResult.value?.let {
-                Spacer(modifier = Modifier.height(20.dp))
-                GpsResultCard(result = it)
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            MatchmakingMapCard(
-                userMarker = userLocation.value?.let {
-                    OsmMarker(
-                        latitude = it.latitude,
-                        longitude = it.longitude,
-                        title = "Tu ubicación",
-                        description = "Actualizada con GPS"
-                    )
-                },
-                rivalMarkers = playerMarkers,
-                hasLocationPermission = hasLocationPermission.value,
-                isSearching = isSearching.value,
-                onRequestPermission = {
-                    permissionLauncher.launch(
-                        arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
+        MatchmakingHeroSection(
+            isSearching = isSearching.value,
+            gpsResult = gpsResult.value,
+            errorMessage = errorMessage.value,
+            hasPermission = hasLocationPermission.value,
+            onRefresh = {
+                if (!isSearching.value) {
+                    if (hasLocationPermission.value) {
+                        scope.launch { performSearch() }
+                    } else {
+                        permissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
                         )
-                    )
+                    }
                 }
-            )
+            },
+            onRequestPermission = {
+                permissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        )
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-            NearbyPlayersList(players = playersWithDistance)
+        gpsResult.value?.let {
+            GpsResultCard(result = it)
+            Spacer(modifier = Modifier.height(24.dp))
         }
+
+        MatchmakingMapCard(
+            userMarker = userLocation.value?.let {
+                OsmMarker(
+                    latitude = it.latitude,
+                    longitude = it.longitude,
+                    title = "Tu ubicación",
+                    description = "Actualizada con GPS"
+                )
+            },
+            rivalMarkers = playerMarkers,
+            hasLocationPermission = hasLocationPermission.value,
+            isSearching = isSearching.value,
+            onRequestPermission = {
+                permissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        MapLegend()
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        NearbyPlayersList(players = playersWithDistance)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -234,78 +232,40 @@ fun MatchmakingScreenNew(navController: NavController) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AnimatedVisibility(
-                visible = true,
-                enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn()
-            ) {
-                Button(
-                    onClick = {
-                        if (isSearching.value) return@Button
-                        if (hasLocationPermission.value) {
-                            scope.launch { performSearch() }
-                        } else {
-                            permissionLauncher.launch(
-                                arrayOf(
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.ACCESS_COARSE_LOCATION
-                                )
+            PrimaryActionButton(
+                text = if (isSearching.value) "Buscando..." else "Buscar rival",
+                enabled = !isSearching.value,
+                onClick = {
+                    if (hasLocationPermission.value) {
+                        scope.launch { performSearch() }
+                    } else {
+                        permissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
                             )
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSearching.value)
-                            colorResource(R.color.neon_green).copy(alpha = 0.6f)
-                        else
-                            colorResource(R.color.neon_green)
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = !isSearching.value
-                ) {
-                    Text(
-                        if (isSearching.value) "Buscando..." else "Buscar rival",
-                        color = colorResource(R.color.background_black),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
+                        )
+                    }
                 }
-            }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            AnimatedVisibility(
-                visible = true,
-                enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn()
-            ) {
-                Button(
-                    onClick = {
-                        isSearching.value = false
-                        errorMessage.value = null
-                        gpsResult.value = null
-                        navController.popBackStack()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.neon_green)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        if (isSearching.value) "Cancelar" else "Atrás",
-                        color = colorResource(R.color.background_black),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
+            SecondaryActionButton(
+                text = if (isSearching.value) "Cancelar" else "Atrás",
+                onClick = {
+                    isSearching.value = false
+                    errorMessage.value = null
+                    gpsResult.value = null
+                    navController.popBackStack()
                 }
-            }
+            )
 
-            Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(32.dp))
         }
     }
+}
+
 }
 
 @Composable
@@ -393,6 +353,210 @@ private fun MapOverlayBox(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
+private fun MatchmakingHeroSection(
+    isSearching: Boolean,
+    gpsResult: GpsResult?,
+    errorMessage: String?,
+    hasPermission: Boolean,
+    onRefresh: () -> Unit,
+    onRequestPermission: () -> Unit
+) {
+    val chipScroll = rememberScrollState()
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = colorResource(R.color.surface_dark).copy(alpha = 0.9f)
+        ),
+        shape = RoundedCornerShape(28.dp),
+        border = BorderStroke(1.dp, colorResource(R.color.neon_green).copy(alpha = 0.35f))
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = "Emparejamiento automático",
+                style = MaterialTheme.typography.headlineSmall,
+                color = colorResource(R.color.text_white),
+                fontWeight = FontWeight.ExtraBold
+            )
+            Text(
+                text = "Juega con personas reales cercanas a ti usando tu GPS nativo",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colorResource(R.color.text_medium_gray)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    val statusText = when {
+                        isSearching -> "Buscando rivales en tiempo real"
+                        gpsResult != null -> "Ubicación sincronizada"
+                        else -> "Listo para iniciar"
+                    }
+                    Text(
+                        text = statusText,
+                        color = colorResource(R.color.text_white),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = if (hasPermission) "GPS activado" else "Necesitamos tu permiso",
+                        color = colorResource(R.color.text_medium_gray),
+                        fontSize = 12.sp
+                    )
+                }
+
+                if (isSearching) {
+                    LoadingSoccerBall(modifier = Modifier.size(72.dp))
+                } else {
+                    IconButton(onClick = onRefresh) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Actualizar",
+                            tint = colorResource(R.color.neon_green)
+                        )
+                    }
+                }
+            }
+
+            if (!hasPermission) {
+                Spacer(modifier = Modifier.height(12.dp))
+                SecondaryActionButton(
+                    text = "Activar GPS",
+                    onClick = onRequestPermission
+                )
+            }
+
+            if (!errorMessage.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(chipScroll),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                listOf("Menos de 5 km", "Nivel PRO", "Ping estable").forEach { label ->
+                    HeroFilterChip(label)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeroFilterChip(label: String) {
+    AssistChip(
+        onClick = {},
+        label = { Text(label, color = colorResource(R.color.text_white)) },
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = colorResource(R.color.background_black).copy(alpha = 0.5f)
+        ),
+        border = BorderStroke(1.dp, colorResource(R.color.neon_green).copy(alpha = 0.3f))
+    )
+}
+
+@Composable
+private fun MapLegend() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        LegendItem(color = colorResource(R.color.neon_green), label = "Tu posición")
+        LegendItem(color = colorResource(R.color.text_white), label = "Jugadores activos")
+    }
+}
+
+@Composable
+private fun LegendItem(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = label,
+            color = colorResource(R.color.text_medium_gray),
+            fontSize = 12.sp
+        )
+    }
+}
+
+@Composable
+private fun StatBadge(
+    title: String,
+    value: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = colorResource(R.color.background_black).copy(alpha = 0.5f),
+        border = BorderStroke(1.dp, colorResource(R.color.neon_green).copy(alpha = 0.2f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(it, contentDescription = null, tint = colorResource(R.color.neon_green))
+            }
+            Column {
+                Text(text = title, color = colorResource(R.color.text_medium_gray), fontSize = 11.sp)
+                Text(text = value, color = colorResource(R.color.text_white), fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrimaryActionButton(text: String, enabled: Boolean, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colorResource(R.color.neon_green),
+            contentColor = colorResource(R.color.background_black),
+            disabledContainerColor = colorResource(R.color.neon_green).copy(alpha = 0.4f),
+            disabledContentColor = colorResource(R.color.background_black)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text(text = text, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun SecondaryActionButton(text: String, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        border = BorderStroke(1.dp, colorResource(R.color.neon_green).copy(alpha = 0.6f)),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text(text = text, color = colorResource(R.color.neon_green), fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
 private fun HintCard(text: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -446,18 +610,22 @@ private fun PlayerRow(player: NearbyPlayer) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(horizontalAlignment = Alignment.Start) {
-            Text(
-                text = player.name,
-                color = colorResource(R.color.text_white),
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 15.sp
-            )
-            Text(
-                text = "${player.skill} • ${player.availability}",
-                color = colorResource(R.color.text_medium_gray),
-                fontSize = 12.sp
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            PlayerAvatar(player.name)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(horizontalAlignment = Alignment.Start) {
+                Text(
+                    text = player.name,
+                    color = colorResource(R.color.text_white),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp
+                )
+                Text(
+                    text = "${player.skill} • ${player.availability}",
+                    color = colorResource(R.color.text_medium_gray),
+                    fontSize = 12.sp
+                )
+            }
         }
 
         Column(horizontalAlignment = Alignment.End) {
@@ -477,67 +645,90 @@ private fun PlayerRow(player: NearbyPlayer) {
 }
 
 @Composable
+private fun PlayerAvatar(name: String) {
+    val letter = name.firstOrNull()?.uppercaseChar() ?: '?'
+    Surface(
+        modifier = Modifier.size(40.dp),
+        shape = CircleShape,
+        color = colorResource(R.color.background_black).copy(alpha = 0.6f),
+        border = BorderStroke(1.dp, colorResource(R.color.neon_green).copy(alpha = 0.3f))
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = letter.toString(),
+                color = colorResource(R.color.neon_green),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
 private fun GpsResultCard(result: GpsResult) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = colorResource(R.color.background_black).copy(alpha = 0.6f)
+            containerColor = colorResource(R.color.surface_dark).copy(alpha = 0.9f)
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(1.dp, colorResource(R.color.neon_green).copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = "Tu ubicación",
+                text = "Resumen GPS",
                 style = MaterialTheme.typography.titleMedium,
                 color = colorResource(R.color.text_white),
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = String.format(Locale.US, "lat=%.5f, lon=%.5f", result.userLat, result.userLon),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorResource(R.color.text_white)
+                text = "Ubicación sincronizada con OpenStreetMap",
+                style = MaterialTheme.typography.bodySmall,
+                color = colorResource(R.color.text_medium_gray)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Distancia al rival",
-                style = MaterialTheme.typography.titleMedium,
-                color = colorResource(R.color.neon_green),
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = result.distanceText,
-                style = MaterialTheme.typography.bodyLarge,
-                color = colorResource(R.color.text_white)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Dirección",
-                style = MaterialTheme.typography.titleMedium,
-                color = colorResource(R.color.neon_green),
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = result.bearingText,
-                style = MaterialTheme.typography.bodyLarge,
-                color = colorResource(R.color.text_white)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                StatBadge(
+                    title = "Distancia",
+                    value = result.distanceText
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                StatBadge(
+                    title = "Dirección",
+                    value = result.bearingText
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = "Punto medio",
-                style = MaterialTheme.typography.titleMedium,
-                color = colorResource(R.color.neon_green),
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.bodySmall,
+                color = colorResource(R.color.text_medium_gray)
             )
             Text(
                 text = result.midpointText,
                 style = MaterialTheme.typography.bodyMedium,
-                color = colorResource(R.color.text_white)
+                color = colorResource(R.color.text_white),
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = String.format(
+                    Locale.US,
+                    "Coordenadas actuales: %.5f / %.5f",
+                    result.userLat,
+                    result.userLon
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = colorResource(R.color.text_medium_gray)
             )
         }
     }

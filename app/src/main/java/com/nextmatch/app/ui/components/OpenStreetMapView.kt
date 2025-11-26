@@ -48,6 +48,7 @@ private fun rememberMapViewWithLifecycle(): MapView {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
             isTilesScaledToDpi = true
+            setUseDataConnection(true)
         }
     }
 

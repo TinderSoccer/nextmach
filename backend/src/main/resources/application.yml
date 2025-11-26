@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: nextmatch-backend
+  data:
+    mongodb:
+      uri: 
+        ${MONGODB_URI:mongodb://localhost:27017/nextmatch}
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework.web: INFO

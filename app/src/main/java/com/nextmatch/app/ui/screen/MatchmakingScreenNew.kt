@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -112,6 +113,12 @@ fun MatchmakingScreenNew(navController: NavController) {
             scope.launch { performSearch() }
         } else {
             errorMessage.value = "Permiso de ubicación requerido para calcular rivales."
+        }
+    }
+
+    LaunchedEffect(hasLocationPermission.value) {
+        if (hasLocationPermission.value && userLocation.value == null && !isSearching.value) {
+            scope.launch { performSearch() }
         }
     }
 

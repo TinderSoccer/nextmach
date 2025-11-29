@@ -19,7 +19,7 @@
      - Selector de canchas y agenda usando los datos del microservicio.
      - Visualización en mapa (OSMDroid) para elegir la ubicación de la cancha.
   5. **API externa (OpenStreetMap)**:
-     - Tiles y mapas provistos por `https://tile.openstreetmap.org/{z}/{x}/{y}.png`.
+     - Tiles y mapas provistos por `https://tile.openstreetmap.org`.
   6. **Notificaciones y mensajería simulada** (plantilla de pantallas para completarse en EFT).
 
   ## 3. Endpoints utilizados

@@ -20,8 +20,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.nextmatch.app.R
 
+import com.nextmatch.app.data.remote.dto.CreateReservationRequestDto
+import com.nextmatch.app.viewmodel.ReservationViewModel
+
 @Composable
-fun MatchFoundScreen(navController: NavController) {
+fun MatchFoundScreen(navController: NavController, reservationViewModel: ReservationViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -102,7 +105,7 @@ fun MatchFoundScreen(navController: NavController) {
                     }
                 }
 
-                Divider(color = colorResource(R.color.background_black).copy(alpha = 0.3f))
+                HorizontalDivider(color = colorResource(R.color.background_black).copy(alpha = 0.3f))
 
                 // Equipo
                 Column {
@@ -119,7 +122,7 @@ fun MatchFoundScreen(navController: NavController) {
                     )
                 }
 
-                Divider(color = colorResource(R.color.background_black).copy(alpha = 0.3f))
+                HorizontalDivider(color = colorResource(R.color.background_black).copy(alpha = 0.3f))
 
                 // Fecha y Hora
                 Column {
@@ -188,7 +191,21 @@ fun MatchFoundScreen(navController: NavController) {
 
         // Botones de acción
         Button(
-            onClick = { navController.navigate("home") },
+            onClick = {
+                val reservationRequest = CreateReservationRequestDto(
+                    cancha = "Futbolito Ñuñoa",
+                    fecha = "2025-07-05",
+                    horaInicio = "19:30:00",
+                    horaFin = "20:30:00",
+                    equipoId = "los-galacticos-fc",
+                    jugadorId = "matias-rojas",
+                    fieldId = "futbolito-nunoa-1234",
+                    estado = "PENDIENTE",
+                    notas = "Partido de prueba"
+                )
+                reservationViewModel.createReservation(reservationRequest)
+                navController.navigate("home")
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

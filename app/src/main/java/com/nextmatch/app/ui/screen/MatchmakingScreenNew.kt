@@ -16,9 +16,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,78 +32,24 @@ import androidx.navigation.NavController
 import com.nextmatch.app.R
 import com.nextmatch.app.ui.components.OpenStreetMapView
 import com.nextmatch.app.ui.components.OsmMarker
-import com.nextmatch.app.utils.GpsCalculator
 import com.nextmatch.app.utils.LocationTracker
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.Locale
+import kotlin.random.Random
+import androidx.compose.runtime.MutableState // NEW IMPORT
 
 @Composable
 fun MatchmakingScreenNew(navController: NavController) {
     val isSearching = remember { mutableStateOf(false) }
-    val gpsResult = remember { mutableStateOf<GpsResult?>(null) }
     val errorMessage = remember { mutableStateOf<String?>(null) }
     val userLocation = remember { mutableStateOf<Location?>(null) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val gpsCalculator = remember { GpsCalculator() }
     val locationTracker = remember(context.applicationContext) {
         LocationTracker(context.applicationContext)
     }
     val hasLocationPermission = remember { mutableStateOf(locationTracker.hasLocationPermission()) }
-    val playerMarkers = remember { emptyList<OsmMarker>() }
-
-    val performSearch: suspend () -> Unit = search@{
-        errorMessage.value = null
-        gpsResult.value = null
-        isSearching.value = true
-
-        try {
-            val location = locationTracker.getCurrentLocation()
-            if (location == null) {
-                errorMessage.value = "No se pudo obtener tu ubicación. Verifica el GPS."
-                return@search
-            }
-            userLocation.value = location
-
-            val distanceKm = gpsCalculator.calcularDistanciaGPS(
-                location.latitude,
-                location.longitude,
-                RIVAL_LATITUDE,
-                RIVAL_LONGITUDE
-            )
-            val bearing = gpsCalculator.calcularAcimutGPS(
-                location.latitude,
-                location.longitude,
-                RIVAL_LATITUDE,
-                RIVAL_LONGITUDE
-            )
-            val midpoint = gpsCalculator.calcularPuntoMedioGPS(
-                location.latitude,
-                location.longitude,
-                RIVAL_LATITUDE,
-                RIVAL_LONGITUDE
-            )
-
-            gpsResult.value = GpsResult(
-                userLat = location.latitude,
-                userLon = location.longitude,
-                rivalLat = RIVAL_LATITUDE,
-                rivalLon = RIVAL_LONGITUDE,
-                distanceText = gpsCalculator.formatearDistancia(distanceKm),
-                bearingText = String.format(Locale.US, "%.1f°", bearing),
-                midpointText = String.format(
-                    Locale.US,
-                    "lat=%.4f lon=%.4f",
-                    midpoint.getOrNull(0) ?: 0.0,
-                    midpoint.getOrNull(1) ?: 0.0
-                )
-            )
-        } catch (e: Exception) {
-            errorMessage.value = "Error al usar el GPS: ${e.message}"
-        } finally {
-            isSearching.value = false
-        }
-    }
+    val rivalMarkers = remember { mutableStateOf<List<OsmMarker>>(emptyList()) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -110,7 +58,15 @@ fun MatchmakingScreenNew(navController: NavController) {
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         hasLocationPermission.value = granted
         if (granted) {
-            scope.launch { performSearch() }
+            scope.launch {
+                performMatchmakingSearch(
+                    errorMessage = errorMessage,
+                    isSearching = isSearching,
+                    userLocation = userLocation,
+                    locationTracker = locationTracker,
+                    rivalMarkers = rivalMarkers
+                )
+            }
         } else {
             errorMessage.value = "Permiso de ubicación requerido para calcular rivales."
         }
@@ -118,7 +74,15 @@ fun MatchmakingScreenNew(navController: NavController) {
 
     LaunchedEffect(hasLocationPermission.value) {
         if (hasLocationPermission.value && userLocation.value == null && !isSearching.value) {
-            scope.launch { performSearch() }
+            scope.launch {
+                performMatchmakingSearch(
+                    errorMessage = errorMessage,
+                    isSearching = isSearching,
+                    userLocation = userLocation,
+                    locationTracker = locationTracker,
+                    rivalMarkers = rivalMarkers
+                )
+            }
         }
     }
 
@@ -164,7 +128,7 @@ fun MatchmakingScreenNew(navController: NavController) {
                     description = "Actualizada con GPS"
                 )
             },
-            rivalMarkers = playerMarkers,
+            rivalMarkers = rivalMarkers.value, // Now displays simulated rivals
             hasLocationPermission = hasLocationPermission.value,
             isSearching = isSearching.value,
             onRequestPermission = {
@@ -179,17 +143,22 @@ fun MatchmakingScreenNew(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        gpsResult.value?.let {
-            GpsResultCard(result = it)
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        // Removed GpsResultCard as requested
 
         PrimaryActionButton(
             text = if (isSearching.value) "Buscando..." else "Iniciar búsqueda",
             enabled = !isSearching.value,
             onClick = {
                 if (hasLocationPermission.value) {
-                    scope.launch { performSearch() }
+                    scope.launch {
+                        performMatchmakingSearch(
+                            errorMessage = errorMessage,
+                            isSearching = isSearching,
+                            userLocation = userLocation,
+                            locationTracker = locationTracker,
+                            rivalMarkers = rivalMarkers
+                        )
+                    }
                 } else {
                     permissionLauncher.launch(
                         arrayOf(
@@ -207,7 +176,6 @@ fun MatchmakingScreenNew(navController: NavController) {
             onClick = {
                 isSearching.value = false
                 errorMessage.value = null
-                gpsResult.value = null
                 navController.popBackStack()
             },
             modifier = Modifier
@@ -217,6 +185,32 @@ fun MatchmakingScreenNew(navController: NavController) {
         ) {
             Text(text = "Volver", color = colorResource(R.color.neon_green), fontWeight = FontWeight.Bold)
         }
+    }
+}
+
+// Refactored performSearch into a private suspend function
+private suspend fun performMatchmakingSearch(
+    errorMessage: MutableState<String?>,
+    isSearching: MutableState<Boolean>,
+    userLocation: MutableState<Location?>,
+    locationTracker: LocationTracker,
+    rivalMarkers: MutableState<List<OsmMarker>>
+) {
+    errorMessage.value = null
+    isSearching.value = true
+
+    try {
+        val location = locationTracker.getCurrentLocation()
+        if (location == null) {
+            errorMessage.value = "No se pudo obtener tu ubicación. Verifica el GPS."
+            return // Returns from the suspend function
+        }
+        userLocation.value = location
+        rivalMarkers.value = generateSimulatedOpponents(location)
+    } catch (e: Exception) {
+        errorMessage.value = "Error al usar el GPS: ${e.message}"
+    } finally {
+        isSearching.value = false
     }
 }
 
@@ -241,7 +235,7 @@ private fun MatchmakingMapCard(
         Box(modifier = Modifier.fillMaxSize()) {
             OpenStreetMapView(
                 userMarker = userMarker,
-                canchaMarkers = rivalMarkers,
+                canchaMarkers = rivalMarkers, // Now displays simulated rivals
                 modifier = Modifier.fillMaxSize(),
                 zoom = 12.0
             )
@@ -330,34 +324,6 @@ private fun MapOverlayBox(content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
-
-@Composable
-private fun StatBadge(
-    title: String,
-    value: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null
-) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = colorResource(R.color.background_black).copy(alpha = 0.5f),
-        border = BorderStroke(1.dp, colorResource(R.color.neon_green).copy(alpha = 0.2f))
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            icon?.let {
-                Icon(it, contentDescription = null, tint = colorResource(R.color.neon_green))
-            }
-            Column {
-                Text(text = title, color = colorResource(R.color.text_medium_gray), fontSize = 11.sp)
-                Text(text = value, color = colorResource(R.color.text_white), fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}
-
 @Composable
 private fun PrimaryActionButton(text: String, enabled: Boolean, onClick: () -> Unit) {
     Button(
@@ -394,86 +360,27 @@ private fun HintCard(text: String, modifier: Modifier = Modifier) {
     }
 }
 
+private fun generateSimulatedOpponents(userLocation: Location): List<OsmMarker> {
+    val simulatedOpponents = mutableListOf<OsmMarker>()
+    val random = Random(System.currentTimeMillis()) // Seed random for consistent results per session if needed
 
-@Composable
-private fun GpsResultCard(result: GpsResult) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = colorResource(R.color.surface_dark).copy(alpha = 0.9f)
-        ),
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, colorResource(R.color.neon_green).copy(alpha = 0.3f))
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = "Resumen GPS",
-                style = MaterialTheme.typography.titleMedium,
-                color = colorResource(R.color.text_white),
-                fontWeight = FontWeight.Bold
+    for (i in 1..5) { // Generate 5 simulated opponents
+        val latOffset = (random.nextDouble() - 0.5) * 0.05 // +/- 0.025 degrees latitude
+        val lonOffset = (random.nextDouble() - 0.5) * 0.05 // +/- 0.025 degrees longitude
+
+        val rivalLat = userLocation.latitude + latOffset
+        val rivalLon = userLocation.longitude + lonOffset
+        val rivalName = "Rival ${i}"
+        val rivalDescription = "Equipo ${i} cerca de ti"
+
+        simulatedOpponents.add(
+            OsmMarker(
+                latitude = rivalLat,
+                longitude = rivalLon,
+                title = rivalName,
+                description = rivalDescription
             )
-            Text(
-                text = "Ubicación sincronizada con OpenStreetMap",
-                style = MaterialTheme.typography.bodySmall,
-                color = colorResource(R.color.text_medium_gray)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                StatBadge(
-                    title = "Distancia",
-                    value = result.distanceText
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                StatBadge(
-                    title = "Dirección",
-                    value = result.bearingText
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Punto medio",
-                style = MaterialTheme.typography.bodySmall,
-                color = colorResource(R.color.text_medium_gray)
-            )
-            Text(
-                text = result.midpointText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorResource(R.color.text_white),
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = String.format(
-                    Locale.US,
-                    "Coordenadas actuales: %.5f / %.5f",
-                    result.userLat,
-                    result.userLon
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = colorResource(R.color.text_medium_gray)
-            )
-        }
+        )
     }
+    return simulatedOpponents
 }
-
-private data class GpsResult(
-    val userLat: Double,
-    val userLon: Double,
-    val rivalLat: Double,
-    val rivalLon: Double,
-    val distanceText: String,
-    val bearingText: String,
-    val midpointText: String
-)
-
-private const val RIVAL_LATITUDE = -12.0464
-private const val RIVAL_LONGITUDE = -77.0428

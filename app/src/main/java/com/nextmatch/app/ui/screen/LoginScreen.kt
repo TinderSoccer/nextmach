@@ -25,11 +25,17 @@ import androidx.navigation.NavController
 import com.nextmatch.app.R
 import com.nextmatch.app.viewmodel.AuthViewModel
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.paint
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreenCompose(navController: NavController, authViewModel: AuthViewModel) {
-    var email by remember { mutableStateOf("test@test.com") }
-    var password by remember { mutableStateOf("password123") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf("") }
     var passwordError by remember { mutableStateOf("") }
     var isEmailFocused by remember { mutableStateOf(false) }
@@ -46,12 +52,59 @@ fun LoginScreenCompose(navController: NavController, authViewModel: AuthViewMode
         }
     }
 
-    Scaffold { innerPadding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.background_black)) // Set solid background color
+    ) {
+        // Draw the soccer field lines manually
+        // Center Line
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(2.dp)
+                .background(Color.White.copy(alpha = 0.5f))
+                .align(Alignment.Center)
+        )
+        // Center Circle (simplified as a square for now, or could use a custom shape)
+        Box(
+            modifier = Modifier
+                .size(100.dp) // Approximate size for a circle
+                .background(Color.Transparent)
+                .border(2.dp, Color.White.copy(alpha = 0.5f), shape = androidx.compose.foundation.shape.CircleShape)
+                .align(Alignment.Center)
+        )
+        // Goal area left (simplified)
+        Box(
+            modifier = Modifier
+                .width(50.dp)
+                .fillMaxHeight(0.3f)
+                .background(Color.Transparent)
+                .border(2.dp, Color.White.copy(alpha = 0.5f))
+                .align(Alignment.CenterStart)
+                .offset(x = 10.dp)
+        )
+        // Goal area right (simplified)
+        Box(
+            modifier = Modifier
+                .width(50.dp)
+                .fillMaxHeight(0.3f)
+                .background(Color.Transparent)
+                .border(2.dp, Color.White.copy(alpha = 0.5f))
+                .align(Alignment.CenterEnd)
+                .offset(x = (-10).dp)
+        )
+
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.6f))
+        )
+
         Column(
             modifier = Modifier
-                .padding(innerPadding)
                 .fillMaxSize()
-                .background(colorResource(R.color.background_black))
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center

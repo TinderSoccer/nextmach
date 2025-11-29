@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "NextMatch"
 include(":app")
-include(":backend")

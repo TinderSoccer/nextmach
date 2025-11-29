@@ -7,16 +7,36 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.nextmatch.app.NextMatchApplication
+import com.nextmatch.app.data.repository.AuthRepository
 import com.nextmatch.app.ui.screen.*
 import com.nextmatch.app.viewmodel.AuthViewModel
 import com.nextmatch.app.viewmodel.AuthViewModelFactory
 import com.nextmatch.app.viewmodel.ContactoViewModel
 import com.nextmatch.app.viewmodel.UsuarioViewModel
+
+import com.nextmatch.app.data.repository.FieldRepository
+import com.nextmatch.app.data.repository.ReservationRepository
+import com.nextmatch.app.viewmodel.FieldViewModel
+import com.nextmatch.app.viewmodel.FieldViewModelFactory
+import com.nextmatch.app.viewmodel.ReservationViewModel
+import com.nextmatch.app.viewmodel.ReservationViewModelFactory
+import androidx.navigation.NavType // New import
+import androidx.navigation.navArgument // New import
+import com.nextmatch.app.data.remote.BackendApiModule // Import BackendApiModule
+import com.nextmatch.app.data.remote.PlayerApiService // Import PlayerApiService
+import com.nextmatch.app.data.remote.TeamApiService // Import TeamApiService
+import com.nextmatch.app.data.repository.PlayerRepository // Import PlayerRepository
+import com.nextmatch.app.data.repository.TeamRepository // Import TeamRepository
+import com.nextmatch.app.viewmodel.PlayerViewModel // Import PlayerViewModel
+import com.nextmatch.app.viewmodel.PlayerViewModelFactory // Import PlayerViewModelFactory
+import com.nextmatch.app.viewmodel.TeamViewModel // Import TeamViewModel
+import com.nextmatch.app.viewmodel.TeamViewModelFactory // Import TeamViewModelFactory
+
 
 @Composable
 fun AppNavigation() {
@@ -28,14 +48,32 @@ fun AppNavigation() {
 
     // AuthViewModel con inyección de dependencias
     val authViewModel: AuthViewModel = viewModel(
-        factory = AuthViewModelFactory(NextMatchApplication.database.usuarioDao())
+        factory = AuthViewModelFactory(AuthRepository())
     )
 
     // Transiciones suaves reutilizables
     val slideInRight = slideInHorizontally(initialOffsetX = { 300 }) + fadeIn()
     val slideOutLeft = slideOutHorizontally(targetOffsetX = { -300 }) + fadeOut()
-    val slideInLeft = slideInHorizontally(initialOffsetX = { -300 }) + fadeIn()
-    val slideOutRight = slideOutHorizontally(targetOffsetX = { 300 }) + fadeOut()
+
+
+    val fieldViewModel: FieldViewModel = viewModel(
+        factory = FieldViewModelFactory(FieldRepository())
+    )
+    val reservationViewModel: ReservationViewModel = viewModel(
+        factory = ReservationViewModelFactory(ReservationRepository())
+    )
+
+    val teamApiService = remember { BackendApiModule.create(TeamApiService::class.java) }
+    val teamRepository = remember { TeamRepository(teamApiService) }
+    val teamViewModel: TeamViewModel = viewModel(
+        factory = TeamViewModelFactory(teamRepository)
+    )
+
+    val playerApiService = remember { BackendApiModule.create(PlayerApiService::class.java) }
+    val playerRepository = remember { PlayerRepository(playerApiService) }
+    val playerViewModel: PlayerViewModel = viewModel(
+        factory = PlayerViewModelFactory(playerRepository)
+    )
 
     NavHost(
         navController = navController,
@@ -65,7 +103,7 @@ fun AppNavigation() {
         composable(
             route = "login",
             enterTransition = { slideInRight },
-            exitTransition = { slideOutLeft }
+            exitTransition = { fadeOut() }
         ) {
             LoginScreenCompose(navController, authViewModel)
         }
@@ -97,21 +135,36 @@ fun AppNavigation() {
             enterTransition = { slideInRight },
             exitTransition = { slideOutLeft }
         ) {
-            TeamsSelectionScreen(navController)
+            TeamsSelectionScreen(navController, teamViewModel)
+        }
+        composable(
+            route = "my_teams", // New route for MyTeamsScreen
+            enterTransition = { slideInRight },
+            exitTransition = { slideOutLeft }
+        ) {
+            MyTeamsScreenCompose(navController, authViewModel, teamViewModel)
         }
         composable(
             route = "match_found",
             enterTransition = { slideInRight },
             exitTransition = { slideOutLeft }
         ) {
-            MatchFoundScreen(navController)
+            MatchFoundScreen(navController, reservationViewModel)
         }
         composable(
-            route = "team_profile",
+            route = "team_profile/{teamId}", // Modified route
+            arguments = listOf(navArgument("teamId") { type = NavType.StringType }), // Add argument
             enterTransition = { slideInRight },
             exitTransition = { slideOutLeft }
-        ) {
-            TeamProfileScreenCompose(navController)
+        ) { backStackEntry ->
+            val teamId = backStackEntry.arguments?.getString("teamId")
+            TeamProfileScreenCompose(
+                navController = navController,
+                teamId = teamId,
+                authViewModel = authViewModel,
+                teamViewModel = teamViewModel,
+                playerViewModel = playerViewModel
+            ) // Pass teamId and ViewModels
         }
 
         // Reserva de Cancha
@@ -120,7 +173,13 @@ fun AppNavigation() {
             enterTransition = { slideInRight },
             exitTransition = { slideOutLeft }
         ) {
-            BookingScreenCompose(navController)
+            BookingScreenCompose(
+                navController,
+                fieldViewModel,
+                reservationViewModel,
+                teamViewModel,
+                authViewModel
+            )
         }
         composable(
             route = "calendar",
@@ -132,9 +191,9 @@ fun AppNavigation() {
         composable(
             route = "confirmation",
             enterTransition = { slideInRight },
-            exitTransition = { slideOutLeft }
+            exitTransition = { fadeOut() }
         ) {
-            ConfirmationScreenCompose(navController)
+            ConfirmationScreenCompose(navController, authViewModel)
         }
 
         // Mensajes
@@ -159,14 +218,14 @@ fun AppNavigation() {
             enterTransition = { slideInRight },
             exitTransition = { slideOutLeft }
         ) {
-            CrearEquipoScreenCompose(navController)
+            CrearEquipoScreenCompose(navController, authViewModel, teamViewModel)
         }
         composable(
             route = "mapa_canchas",
             enterTransition = { slideInRight },
             exitTransition = { slideOutLeft }
         ) {
-            MapaCanchasScreenCompose(navController)
+            MapaCanchasScreenCompose(navController, fieldViewModel)
         }
         composable(
             route = "perfil_usuario",

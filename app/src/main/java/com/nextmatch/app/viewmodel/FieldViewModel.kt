@@ -15,11 +15,13 @@ data class FieldUIState(
     val error: String? = null
 )
 
+// Descarga la informacion de canchas y mantiene el estado Compose amigable.
 class FieldViewModel(private val repository: FieldRepository = FieldRepository()) : ViewModel() {
 
     var uiState by mutableStateOf(FieldUIState())
         private set
 
+    // Solicita las canchas al backend y actualiza la UI en consecuencia.
     fun fetchFields() {
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, error = null)

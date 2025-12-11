@@ -16,6 +16,7 @@ data class PlayerUIState(
     val error: String? = null
 )
 
+// Administra la coleccion de jugadores y filtros por equipo.
 class PlayerViewModel(private val repository: PlayerRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PlayerUIState(isLoading = true))
@@ -24,6 +25,7 @@ class PlayerViewModel(private val repository: PlayerRepository) : ViewModel() {
     private var currentTeamFilter: String? = null
 
     init {
+        // Replica continuamente los cambios del repositorio y carga la primera lista.
         viewModelScope.launch {
             repository.players.collectLatest { players ->
                 _uiState.value = _uiState.value.copy(players = players, isLoading = false, error = null)
@@ -32,6 +34,7 @@ class PlayerViewModel(private val repository: PlayerRepository) : ViewModel() {
         refreshPlayers(null)
     }
 
+    // Descarga los jugadores desde el backend opcionalmente filtrados por equipo.
     fun refreshPlayers(equipoId: String?) {
         currentTeamFilter = equipoId
         viewModelScope.launch {
@@ -46,6 +49,7 @@ class PlayerViewModel(private val repository: PlayerRepository) : ViewModel() {
         }
     }
 
+    // Inserta un nuevo jugador y vuelve a sincronizar la lista con el filtro actual.
     fun insertPlayer(player: PlayerEntity) {
         viewModelScope.launch {
             try {
@@ -57,6 +61,7 @@ class PlayerViewModel(private val repository: PlayerRepository) : ViewModel() {
         }
     }
 
+    // Actualiza un jugador remoto y refresca la lista observada.
     fun updatePlayer(player: PlayerEntity) {
         viewModelScope.launch {
             try {
@@ -68,6 +73,7 @@ class PlayerViewModel(private val repository: PlayerRepository) : ViewModel() {
         }
     }
 
+    // Remueve un jugador del equipo y vuelve a consultar al backend.
     fun deletePlayer(player: PlayerEntity) {
         viewModelScope.launch {
             try {

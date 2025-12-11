@@ -14,6 +14,7 @@ import com.nextmatch.app.ui.theme.NextMatchTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Configura el contenedor Compose que envolvera toda la app.
         enableEdgeToEdge()
         setContent {
             NextMatchTheme {

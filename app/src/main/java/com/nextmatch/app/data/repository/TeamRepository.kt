@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+// Fuente de datos que combina cache en memoria con el API de equipos.
 class TeamRepository(
     private val teamApiService: TeamApiService
 ) {
@@ -16,6 +17,7 @@ class TeamRepository(
     private val _teams = MutableStateFlow<List<TeamEntity>>(emptyList())
     val teams: StateFlow<List<TeamEntity>> = _teams.asStateFlow()
 
+    // Sincroniza la lista local con el backend.
     suspend fun refreshTeams() {
         try {
             val remoteTeams = teamApiService.getTeams().map { it.toEntity() }
@@ -26,6 +28,7 @@ class TeamRepository(
         }
     }
 
+    // Crea un equipo remoto y lo agrega al flujo interno.
     suspend fun insertTeam(team: TeamEntity) {
         try {
             val createdTeam = teamApiService.createTeam(team.toDto()).toEntity().copy(
@@ -38,6 +41,7 @@ class TeamRepository(
         }
     }
 
+    // Reemplaza un equipo existente con los datos devueltos por el servidor.
     suspend fun updateTeam(team: TeamEntity) {
         try {
             val updatedTeam = teamApiService.updateTeam(team.id, team.toDto()).toEntity().copy(
@@ -50,6 +54,7 @@ class TeamRepository(
         }
     }
 
+    // Borra el equipo en el servidor y limpia la cache en memoria.
     suspend fun deleteTeam(team: TeamEntity) {
         try {
             teamApiService.deleteTeam(team.id)
@@ -60,5 +65,6 @@ class TeamRepository(
         }
     }
 
+    // Permite recuperar rapidamente un equipo especifico desde memoria.
     fun getTeamById(id: String): TeamEntity? = _teams.value.find { it.id == id }
 }

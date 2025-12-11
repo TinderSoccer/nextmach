@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+// Administra las operaciones remotas y el cache en memoria de jugadores.
 class PlayerRepository(
     private val playerApiService: PlayerApiService
 ) {
@@ -16,6 +17,7 @@ class PlayerRepository(
     private val _players = MutableStateFlow<List<PlayerEntity>>(emptyList())
     val players: StateFlow<List<PlayerEntity>> = _players.asStateFlow()
 
+    // Consulta jugadores filtrados y actualiza el flujo local.
     suspend fun refreshPlayers(equipoId: String? = null) {
         try {
             val remotePlayers = playerApiService.getPlayers(equipoId).map { it.toEntity() }
@@ -26,6 +28,7 @@ class PlayerRepository(
         }
     }
 
+    // Crea un jugador remoto y lo agrega al estado actual.
     suspend fun insertPlayer(player: PlayerEntity) {
         try {
             val createdPlayer = playerApiService.createPlayer(player.toDto()).toEntity()
@@ -36,6 +39,7 @@ class PlayerRepository(
         }
     }
 
+    // Sincroniza un jugador existente con el backend.
     suspend fun updatePlayer(player: PlayerEntity) {
         try {
             val updatedPlayer = playerApiService.updatePlayer(player.id, player.toDto()).toEntity()
@@ -46,6 +50,7 @@ class PlayerRepository(
         }
     }
 
+    // Elimina al jugador en el server y lo quita de la cache.
     suspend fun deletePlayer(player: PlayerEntity) {
         try {
             playerApiService.deletePlayer(player.id)

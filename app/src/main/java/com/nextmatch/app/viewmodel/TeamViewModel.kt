@@ -18,12 +18,14 @@ data class TeamUIState(
     val error: String? = null
 )
 
+// Convierte los cambios del repositorio de equipos en un flujo listo para Compose.
 class TeamViewModel(private val repository: TeamRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TeamUIState(isLoading = true))
     val uiState: StateFlow<TeamUIState> = _uiState.asStateFlow()
 
     init {
+        // Suscribe la UI al stream local y dispara una primera carga remota.
         viewModelScope.launch {
             repository.teams.collectLatest { teams ->
                 _uiState.value = _uiState.value.copy(teams = teams, isLoading = false, error = null)
@@ -32,6 +34,7 @@ class TeamViewModel(private val repository: TeamRepository) : ViewModel() {
         refreshTeams()
     }
 
+    // Fuerza sincronizacion remota, mostrando progreso y errores.
     fun refreshTeams() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
@@ -45,6 +48,7 @@ class TeamViewModel(private val repository: TeamRepository) : ViewModel() {
         }
     }
 
+    // Inserta un equipo y deja que el repositorio actualice el flujo.
     fun insertTeam(team: TeamEntity) {
         viewModelScope.launch {
             try {
@@ -56,6 +60,7 @@ class TeamViewModel(private val repository: TeamRepository) : ViewModel() {
         }
     }
 
+    // Actualiza datos del equipo seleccionado en el servidor.
     fun updateTeam(team: TeamEntity) {
         viewModelScope.launch {
             try {
@@ -67,6 +72,7 @@ class TeamViewModel(private val repository: TeamRepository) : ViewModel() {
         }
     }
 
+    // Elimina el equipo remoto y limpia el error si todo salio bien.
     fun deleteTeam(team: TeamEntity) {
         viewModelScope.launch {
             try {
@@ -78,5 +84,6 @@ class TeamViewModel(private val repository: TeamRepository) : ViewModel() {
         }
     }
 
+    // Busca rapidamente un equipo ya cacheado.
     fun getTeamById(id: String): TeamEntity? = repository.getTeamById(id)
 }

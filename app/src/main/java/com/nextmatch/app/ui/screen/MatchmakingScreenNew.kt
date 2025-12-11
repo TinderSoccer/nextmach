@@ -40,6 +40,7 @@ import androidx.compose.runtime.MutableState // NEW IMPORT
 
 @Composable
 fun MatchmakingScreenNew(navController: NavController) {
+    // Orquesta el flujo de emparejamiento via GPS y gestiona los permisos.
     val isSearching = remember { mutableStateOf(false) }
     val errorMessage = remember { mutableStateOf<String?>(null) }
     val userLocation = remember { mutableStateOf<Location?>(null) }
@@ -51,6 +52,7 @@ fun MatchmakingScreenNew(navController: NavController) {
     val hasLocationPermission = remember { mutableStateOf(locationTracker.hasLocationPermission()) }
     val rivalMarkers = remember { mutableStateOf<List<OsmMarker>>(emptyList()) }
 
+    // Lanzador que solicita permisos de ubicacion antes de buscar rivales.
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -72,6 +74,7 @@ fun MatchmakingScreenNew(navController: NavController) {
         }
     }
 
+    // Intenta obtener la ubicacion tan pronto se conceden los permisos.
     LaunchedEffect(hasLocationPermission.value) {
         if (hasLocationPermission.value && userLocation.value == null && !isSearching.value) {
             scope.launch {
@@ -119,6 +122,7 @@ fun MatchmakingScreenNew(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Tarjeta con el mapa y los marcadores del usuario/rivales.
         MatchmakingMapCard(
             userMarker = userLocation.value?.let {
                 OsmMarker(
@@ -145,6 +149,7 @@ fun MatchmakingScreenNew(navController: NavController) {
 
         // Removed GpsResultCard as requested
 
+        // CTA para disparar manualmente la busqueda nuevamente.
         PrimaryActionButton(
             text = if (isSearching.value) "Buscando..." else "Iniciar búsqueda",
             enabled = !isSearching.value,
@@ -189,6 +194,7 @@ fun MatchmakingScreenNew(navController: NavController) {
 }
 
 // Refactored performSearch into a private suspend function
+// Encapsula la logica de busqueda: obtener GPS, simular rivales y manejar errores.
 private suspend fun performMatchmakingSearch(
     errorMessage: MutableState<String?>,
     isSearching: MutableState<Boolean>,
@@ -214,6 +220,7 @@ private suspend fun performMatchmakingSearch(
     }
 }
 
+// Contenedor visual para renderizar el mapa OSM y overlays de estado.
 @Composable
 private fun MatchmakingMapCard(
     userMarker: OsmMarker?,
@@ -279,6 +286,7 @@ private fun MatchmakingMapCard(
     }
 }
 
+// Resumen textual del estado del GPS/permisos al usuario.
 @Composable
 private fun MiniStatusCard(
     isSearching: Boolean,
@@ -305,6 +313,7 @@ private fun MiniStatusCard(
     }
 }
 
+// Crea una capa oscura sobre el mapa para mostrar mensajes temporales.
 @Composable
 private fun MapOverlayBox(content: @Composable ColumnScope.() -> Unit) {
     Box(
@@ -324,6 +333,7 @@ private fun MapOverlayBox(content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
+// Boton reutilizable para acciones principales en la pantalla.
 @Composable
 private fun PrimaryActionButton(text: String, enabled: Boolean, onClick: () -> Unit) {
     Button(
@@ -344,6 +354,7 @@ private fun PrimaryActionButton(text: String, enabled: Boolean, onClick: () -> U
     }
 }
 
+// Tarjeta liviana para instrucciones contextuales.
 @Composable
 private fun HintCard(text: String, modifier: Modifier = Modifier) {
     Card(
@@ -360,6 +371,7 @@ private fun HintCard(text: String, modifier: Modifier = Modifier) {
     }
 }
 
+// Genera rivales ficticios alrededor de la ubicacion del usuario para poblar el mapa.
 private fun generateSimulatedOpponents(userLocation: Location): List<OsmMarker> {
     val simulatedOpponents = mutableListOf<OsmMarker>()
     val random = Random(System.currentTimeMillis()) // Seed random for consistent results per session if needed

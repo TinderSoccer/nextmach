@@ -41,6 +41,7 @@ import com.nextmatch.app.viewmodel.TeamViewModelFactory // Import TeamViewModelF
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    // En este composable se construyen los viewmodels globales y el arbol de pantallas.
 
     // ViewModels compartidos
     val usuarioViewModel: UsuarioViewModel = viewModel()
@@ -75,6 +76,7 @@ fun AppNavigation() {
         factory = PlayerViewModelFactory(playerRepository)
     )
 
+    // Define las pantallas disponibles y como se navega entre ellas.
     NavHost(
         navController = navController,
         startDestination = "landing",

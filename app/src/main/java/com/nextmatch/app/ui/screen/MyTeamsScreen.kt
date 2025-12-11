@@ -33,9 +33,11 @@ fun MyTeamsScreenCompose(
     authViewModel: AuthViewModel, // We need AuthViewModel to get the current user's ID
     teamViewModel: TeamViewModel // teamViewModel is now provided by AppNavigation
 ) {
+    // Pantalla dedicada a administrar los equipos creados por el usuario.
     val uiState by teamViewModel.uiState.collectAsState()
     val authState by authViewModel.estado.collectAsState()
     val currentUserId = authState.usuarioActual?.id // Get the authenticated user's ID
+    // Equipos que pertenecen al usuario autenticado.
     val ownedTeams = remember(uiState.teams, currentUserId) {
         if (currentUserId.isNullOrBlank()) {
             emptyList()
@@ -43,6 +45,7 @@ fun MyTeamsScreenCompose(
             uiState.teams.filter { it.userId == currentUserId }
         }
     }
+    // Equipos globales que se ofrecen solo para consulta.
     val nextMatchTeams = remember(uiState.teams, currentUserId) {
         if (uiState.teams.isEmpty()) emptyList()
         else uiState.teams.filter { team ->
@@ -54,6 +57,7 @@ fun MyTeamsScreenCompose(
     var showAddDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
 
+    // Si el equipo seleccionado desaparece, se limpia la seleccion.
     LaunchedEffect(ownedTeams) {
         if (selectedTeam != null && ownedTeams.none { it.id == selectedTeam?.id }) {
             selectedTeam = null
@@ -238,6 +242,7 @@ fun MyTeamsScreenCompose(
         }
     }
 
+    // Dialogo modal para crear un nuevo equipo.
     if (showAddDialog) {
         TeamDialog(
             team = null,
@@ -255,6 +260,7 @@ fun MyTeamsScreenCompose(
         )
     }
 
+    // Dialogo reutilizado para editar el equipo seleccionado.
     if (showEditDialog && selectedTeam != null) {
         TeamDialog(
             team = selectedTeam,

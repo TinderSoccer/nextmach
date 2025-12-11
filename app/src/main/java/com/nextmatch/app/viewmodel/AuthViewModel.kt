@@ -16,10 +16,12 @@ data class AuthUiState(
     val isAutenticado: Boolean = false
 )
 
+// Maneja el ciclo de autenticacion y sincroniza el AuthUiState con el backend.
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     private val _estado = MutableStateFlow(AuthUiState())
     val estado: StateFlow<AuthUiState> = _estado
 
+    // Invoca el registro y refleja el resultado en la UI.
     fun registrarUsuario(
         nombre: String,
         correo: String,
@@ -50,6 +52,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         }
     }
 
+    // Gestiona el inicio de sesion y errores basicos de credenciales.
     fun iniciarSesion(correo: String, clave: String) {
         if (correo.isBlank() || clave.isBlank()) {
             _estado.update { it.copy(error = "Correo y contraseña requeridos") }
@@ -75,10 +78,12 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         }
     }
 
+    // Restablece el estado cuando el usuario cierra sesion.
     fun cerrarSesion() {
         _estado.value = AuthUiState()
     }
 
+    // Permite actualizar datos basicos del perfil activo.
     fun actualizarUsuario(nombre: String, direccion: String) {
         val usuarioActual = _estado.value.usuarioActual ?: return
         viewModelScope.launch {
@@ -92,6 +97,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         }
     }
 
+    // Reglas simples de validacion lado cliente para evitar llamadas innecesarias.
     private fun validarDatos(
         nombre: String,
         correo: String,

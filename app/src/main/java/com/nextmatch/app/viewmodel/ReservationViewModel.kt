@@ -17,11 +17,13 @@ data class ReservationUiState(
     val error: String? = null
 )
 
+// Controla la creacion de reservas y expone el estado resultante a la UI.
 class ReservationViewModel(private val repository: ReservationRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ReservationUiState())
     val uiState: StateFlow<ReservationUiState> = _uiState.asStateFlow()
 
+    // Ejecuta la peticion de reserva y propaga carga, exito y error.
     fun createReservation(request: CreateReservationRequestDto) {
         viewModelScope.launch {
             _uiState.value = ReservationUiState(isLoading = true)
@@ -38,11 +40,13 @@ class ReservationViewModel(private val repository: ReservationRepository) : View
         }
     }
 
+    // Limpia el estado para permitir un nuevo flujo sin residuos.
     fun clearStatus() {
         _uiState.value = ReservationUiState()
     }
 }
 
+// Factory usada por Navigation para inyectar el repositorio.
 class ReservationViewModelFactory(
     private val repository: ReservationRepository
 ) : ViewModelProvider.Factory {
